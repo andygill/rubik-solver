@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 -- standard notation for the sides
 -- the front, clockwise round the others, the back
 module Types where
@@ -21,10 +22,7 @@ corners = ((Top,Left),(Bottom,Right))
 
 ------------------------------------------------------------------------------
 
-newtype Face a = Face (Rank -> File -> a)	-- 3x3
-
-elemsFace :: Face a -> [a]
-elemsFace (Face face) = [ face a b | a <- [Top .. Bottom], b <- [Left .. Right]]
+newtype Face a = Face (Array (Rank,File) a)	-- 3x3
 
 instance Eq a => Eq (Face a) where
         f1 == f2 = elemsFace f1 == elemsFace f2
@@ -35,49 +33,64 @@ instance Ord a => Ord (Face a) where
 instance (Show a) => Show (Face a) where
    show (Face arr) = unlines $
                    [ "+---+" ] ++
-		   [ "|" ++ concat [ show (arr rank file) | file <- [Left  .. Right] ] ++ "|"
+		   [ "|" ++ concat [ show (arr ! (rank,file)) | file <- [Left  .. Right] ] ++ "|"
 		     | rank <- [Top .. Bottom ]
 		   ] ++
                    [ "+---+" ]
 
 instance Functor Face where
-  fmap f (Face face) = Face (\ a b -> f (face a b))
+  fmap f (Face face) = Face (fmap f face)
 
 instance Applicative Face where
-  pure a = Face (\ _ _ -> a)
-  (Face f) <*> (Face a) = Face $ \ rank file -> f rank file (a rank file)
+  pure a = Face $ array corners [ (i,a) | i <- range corners ]
+  (Face f) <*> (Face a) = Face $ array corners [ (i,(f ! i) (a ! i)) | i <- range corners ]
 
-instance Monad Face where
-  return a = Face (\ _ _ -> a)
-  (Face f) >>= k = Face $ \ rank file -> case k (f rank file) of
-                                          Face f' -> f' rank file
+-- Not a monad
+
+elemsFace :: Face a -> [[a]]
+elemsFace (Face face) = [ [ face ! (a,b) | b <- [Left .. Right] ] |  a <- [Top .. Bottom]]
+
 
 lookupFace :: Face a -> Rank -> File -> a
-lookupFace (Face a) rank file = a rank file
-{-
+lookupFace (Face a) rank file = a ! (rank,file)
+
+
 newFace :: [[a]] -> Face a
-newFace xss = Face $ array corners
+newFace xss =
+        Face $ array corners
 		   [  ((rank,file),x)
 		   | (rank,xs) <- zip [Top .. Bottom ] xss
 		   , (file,x) <- zip [Left  .. Right] xs
 		   ]
--}
+
+
 ------------------------------------------------------------------------------
-{-
+
 data Side      = F | U | R | D | L | B
 		deriving (Eq,Ord,Enum,Show,Ix)
 
-newtype Cube a = Cube (Array Side (Face a))	-- 3 long
+sides = (F,B)
+
+newtype Cube a = Cube (Array Side (Face a))
 	deriving (Eq,Ord)
 
+elemsCube :: Cube a -> [Face a]
+elemsCube (Cube a) = elems a
+
+
 newCube :: [Face a] -> Cube a
-newCube faces = Cube $ array (F,B)
+newCube faces = Cube $ array sides
 		[ (x,face)
-		| (x,face) <- zip [F .. B] faces
+		| (x,face) <- zip (range sides) faces
 		]
 
 instance Functor Cube where
   fmap f (Cube arr) = Cube (fmap (fmap f) arr)
+
+
+instance Applicative Cube where
+  pure a = Cube $ array sides [ (i,pure a) | i <- range sides ]
+  (Cube f) <*> (Cube a) = Cube $ array sides [ (i,(f ! i) <*> (a ! i)) | i <- range sides ]
 
 instance Show a => Show (Cube a) where
   show (Cube faces) =
@@ -94,7 +107,6 @@ instance Show a => Show (Cube a) where
 	l = show (faces ! L)
 	b = show (faces ! B)
 
-
 ------------------------------------------------------------------------------
 
 newtype X = X Char
@@ -102,30 +114,14 @@ newtype X = X Char
 instance Show X where
   show (X c) = [c]
 
-{-
-getFace :: Cube a -> Side -> a
-getFace (Cube sqs) file = sqs ! file
-
-setFace :: Cube a -> Side -> a -> Cube a
-setFace (Cube sqs) file a = Cube (sqs // [(file,a)])
--}
-
-
 ------------------------------------------------------------------------------
-{-
-corner :: Side -> Side -> Maybe Turn
-corner to from =
-  rom -
-corner L F = r
-corner L B = Nothing
--}
 
---rotTo :: Side -> Side -> Turn
---rotTo side newface = init
-
+lookupCube :: Cube a -> Side -> Face a
+lookupCube (Cube sqs) file = sqs ! file
 
 ------------------------------------------------------------------------------
 
+-- A way of showing a simple face
 niceFace :: String -> Face X
 niceFace str = newFace [[a,b,c],[d,e,f],[g,h,i]]
   where
@@ -140,6 +136,71 @@ bFace = niceFace "6  66 66 "
 
 cube = newCube [fFace,uFace,rFace,dFace,lFace,bFace]
 
+------------------------------------------------------------------------------
+
+data Turn = Clock | OneEighty | CounterClock
+     deriving (Eq,Ord,Show)
+
+negateTurn :: Turn -> Turn
+negateTurn Clock = CounterClock
+negateTurn CounterClock = Clock
+negateTurn OneEighty = OneEighty
+
+class Rotate a where
+        rotate :: Turn -> a -> a                -- pointwise rotation
+
+instance Rotate (Face a) where
+        rotate d (Face a) = Face $ array corners [ (rotate d ix,a) | (ix,a) <- assocs a]
+
+instance Rotate (Rank,File) where
+        -- Memoize!
+        rotate Clock (r,f)
+	       = ( toEnum (1 + f')
+		 , toEnum (1 + negate r')
+	         )
+           where
+	           r' = fromEnum r - 1
+	           f' = fromEnum f - 1
+        rotate OneEighty rf =  rotate Clock . rotate Clock $ rf
+        rotate CounterClock rf =  rotate Clock . rotate Clock . rotate Clock $ rf
+
+-- rotateCube :: Side -> Turn -> Cube Rotate
+{-
+rotateCube :: Side -> Turn -> Cube a -> Cube a  -- moves the sides
+-- Symetry of axis
+rotateCube D turn = rotateCube U (negateTurn turn)
+rotateCube L turn = rotateCube R (negateTurn turn)
+rotateCube B turn = rotateCube F (negateTurn turn)
+
+-- Symetry of turns
+rotateCube side Clock        = rotateCubeClock side
+rotateCube side OneEighty    = rotateCube side Clock . rotateCube side Clock
+rotateCube side CounterClock = rotateCube side Clock . rotateCube side Clock . rotateCube side Clock
+
+rotateCubeClock :: Side -> Cube a -> Cube a  -- moves the sides
+rotateCubeClock F = cube
+
+-}
+
+opposites :: [(Side,Side)]
+opposites = [(F,B),(U,D),(R,L)] ++ map swap opposites
+
+swap :: (a,b) -> (b,a)
+swap (a,b) = (b,a)
+
+opposite :: Side -> Side
+opposite = fromJust . flip lookup opposites
+
+-- This is about projecting to a two-D plain
+circ :: Side -> [Side]
+circ F = [U,R,D,L]
+circ U = [D,R,F,L]
+circ R = [U,B,D,F]
+circ o = flip (circ (opposite o))
+  where flip (x:xs) = x : reverse xs
+
+
+{-
 ------------------------------------------------------------------------------
 
 -- cut a square from a board, from (-0.5,-0.5) to (0.5,0.5)
