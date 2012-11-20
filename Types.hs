@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances, KindSignatures, GADTs #-}
 -- standard notation for the sides
 -- the front, clockwise round the others, the back
 module Types where
@@ -22,7 +22,9 @@ corners = ((Top,Left),(Bottom,Right))
 
 ------------------------------------------------------------------------------
 
-newtype Face a = Face (Array (Rank,File) a)	-- 3x3
+data Face :: * -> * where
+        Face :: Array (Rank,File) a -> Face a	-- 3x3
+--        PermuteFace  :: ((Rank,File) -> (Rank,File)) -> Face (a -> a)
 
 instance Eq a => Eq (Face a) where
         f1 == f2 = elemsFace f1 == elemsFace f2
@@ -31,12 +33,16 @@ instance Ord a => Ord (Face a) where
         f1 `compare` f2 = elemsFace f1 `compare` elemsFace f2
 
 instance (Show a) => Show (Face a) where
-   show (Face arr) = unlines $
-                   [ "+---+" ] ++
-		   [ "|" ++ concat [ show (arr ! (rank,file)) | file <- [Left  .. Right] ] ++ "|"
+   show f@(Face arr) = unlines $
+                   bar ++
+		   concat
+	           [ [ "|" ++ concat [ show' (arr ! (rank,file)) ++ "|" | file <- [Left  .. Right] ] ] ++ bar
 		     | rank <- [Top .. Bottom ]
-		   ] ++
-                   [ "+---+" ]
+		   ]
+    where maxWidth = maximum $ map (length . show) $ concat $ elemsFace f
+          show' n  = take maxWidth (show n ++ repeat ' ')
+          bar      = [ "+" ++ concat [ take maxWidth (repeat '-') ++ "+" | _ <- [1..3]] ]
+--   show (PermuteFace f) = show (pure f <*> coordFace)
 
 instance Functor Face where
   fmap f (Face face) = Face (fmap f face)
@@ -44,7 +50,13 @@ instance Functor Face where
 instance Applicative Face where
   pure a = Face $ array corners [ (i,a) | i <- range corners ]
   (Face f) <*> (Face a) = Face $ array corners [ (i,(f ! i) (a ! i)) | i <- range corners ]
-
+{-
+  (PermuteFace f) <*> (Face a) = Face $ array corners [ (i,a ! (f i)) | i <- range corners ]
+  -- F ((a -> a) -> (a -> a)) -> F (a -> a) -> F (a -> a)
+  (Face a) <*> (PermuteFace f) = error "Ug 1"
+  -- F ((a -> a) -> (a -> a)) -> F (a -> a) -> F (a -> a)
+  (PermuteFace a) <*> (PermuteFace f) = error "Ug 2"
+-}
 -- Not a monad
 
 elemsFace :: Face a -> [[a]]
@@ -64,40 +76,140 @@ newFace xss =
 		   ]
 
 
+coordFace :: Face (Rank,File)
+coordFace = forAllFace id
+
+permuteFace :: Face (Rank,File) -> Face a -> Face a
+permuteFace (Face coord) (Face face)
+        = Face $ array corners
+                       [ (i,(face ! (coord ! i)))
+                       | i <- range corners
+                       ]
+
+
+forAllFace :: ((Rank,File) -> a) -> Face a
+forAllFace f = Face $ array corners [ (i,f i) | i <- range corners ]
+
+--permuteFace :: Face (Rank,File) -> Face (a -> a)
+--permuteFace (Face f) = PermuteFace (f !)
+{-
+permuteFace c = f <*>
+        = Face $ array corners
+                       [ (i,(face ! (coord ! i)))
+                       | i <- range corners
+                       ]
+-}
+
+f = newFace [[1,2,3],[4,5,6],[7,8,9]]
+
 ------------------------------------------------------------------------------
+
+class Inverse a where
+  inverse :: a -> a
+
+------------------------------------------------------------------------------
+
+data Turn = Clock | OneEighty | CounterClock
+     deriving (Eq,Ord,Show)
+
+instance Inverse Turn where
+    inverse Clock = CounterClock
+    inverse CounterClock = Clock
+    inverse OneEighty = OneEighty
+
+promoteClock :: (a -> a) -> Turn -> a -> a
+promoteClock f Clock        = f
+promoteClock f OneEighty    = f . f
+promoteClock f CounterClock = f . f . f
+
+
+rotate2 :: Turn -> (Rank,File) -> (Rank,File)
+rotate2 = promoteClock $ \ (r,f) ->
+                let
+	           r' = fromEnum r - 1
+	           f' = fromEnum f - 1
+                in
+	         ( toEnum (1 + f')
+		 , toEnum (1 + negate r')
+	         )
+
+rotateFace :: Turn -> Face a -> Face a
+rotateFace = permuteFace . forAllFace . rotate2 . inverse
+
+---------------------------------------------------------------------------------
 
 data Side      = F | U | R | D | L | B
 		deriving (Eq,Ord,Enum,Show,Ix)
 
 sides = (F,B)
 
-newtype Cube a = Cube (Array Side (Face a))
+opposites :: [(Side,Side)]
+opposites = [(F,B),(U,D),(R,L)] ++ map swap opposites
+
+swap :: (a,b) -> (b,a)
+swap (a,b) = (b,a)
+
+opposite :: Side -> Side
+opposite = fromJust . flip lookup opposites
+
+-- This is about projecting to a two-D plane, by listing neighbours, clockwise.
+circ :: Side -> [Side]
+circ F = [U,R,D,L]
+circ U = [B,R,F,L]
+circ R = [U,B,D,F]
+circ o = flip (circ (opposite o))
+  where flip (x:xs) = x : reverse xs
+
+rotateSide :: Side -> Turn -> Side -> Side
+rotateSide = promoteClock . rotateSideClock
+
+rotateSideClock :: Side -> Side -> Side
+rotateSideClock front side
+        = case lookup side pairs of
+            Nothing -> error "the impossible happens in rotateSideClock"
+            Just side' -> side'
+   where
+        pairs     = zip neighbors (rotate neighbors)
+                 ++ [ (s,s)
+                    | s <- range sides
+                    , s `notElem` neighbors
+                    ]
+
+        neighbors = circ front
+        rotate xs = tail xs ++ [head xs]
+
+---------------------------------------------------------------------------------
+
+
+newtype Cube a = Cube (Array Side a)
 	deriving (Eq,Ord)
 
-elemsCube :: Cube a -> [Face a]
+
+elemsCube :: Cube a -> [a]
 elemsCube (Cube a) = elems a
 
 
-newCube :: [Face a] -> Cube a
+newCube :: [a] -> Cube a
 newCube faces = Cube $ array sides
 		[ (x,face)
 		| (x,face) <- zip (range sides) faces
 		]
 
-instance Functor Cube where
-  fmap f (Cube arr) = Cube (fmap (fmap f) arr)
 
+instance Functor Cube where
+  fmap f (Cube arr) = Cube (fmap f arr)
 
 instance Applicative Cube where
-  pure a = Cube $ array sides [ (i,pure a) | i <- range sides ]
-  (Cube f) <*> (Cube a) = Cube $ array sides [ (i,(f ! i) <*> (a ! i)) | i <- range sides ]
+  pure a = Cube $ array sides [ (i,a) | i <- range sides ]
+  (Cube f) <*> (Cube a) = Cube $ array sides [ (i,(f ! i) (a ! i)) | i <- range sides ]
+
 
 instance Show a => Show (Cube a) where
   show (Cube faces) =
 	u ++ "\n"
 	          ++ unlines [ a ++ " " ++ b ++ " " ++ c ++ " " ++ d
 			     | (a,b,c,d) <- zip4 (lines f) (lines r) (lines b) (lines l)
-			     ] ++ "\n" ++
+			     ] ++
 	d
      where
 	f = show (faces ! F)
@@ -106,6 +218,35 @@ instance Show a => Show (Cube a) where
 	d = show (faces ! D)
 	l = show (faces ! L)
 	b = show (faces ! B)
+
+
+permuteCube :: Cube Side -> Cube a -> Cube a
+permuteCube (Cube coord) (Cube cube)
+        = Cube $ array sides
+                       [ (i,(cube ! (coord ! i)))
+                       | i <- range sides
+                       ]
+
+forAllCube :: (Side -> a) -> Cube a
+forAllCube f = Cube $ array sides [ (i,f i) | i <- range sides ]
+
+rotateCube :: Side -> Turn -> Cube a -> Cube a
+rotateCube side turn = permuteCube (forAllCube (rotateSide side $ inverse turn))
+
+------------------------------------------------------------------------------
+
+--rotate :: (XYZ,Turn) -> Side -> Side
+
+--instance Rotate Side where
+--        -- Memoize!
+--        rotate Clock (r,f)
+
+--rotateCube :: Side -> Cube a -> Cube a
+
+--rotateCube F
+
+-- data Side      = F | U | R | D | L | B
+
 
 ------------------------------------------------------------------------------
 
@@ -116,7 +257,7 @@ instance Show X where
 
 ------------------------------------------------------------------------------
 
-lookupCube :: Cube a -> Side -> Face a
+lookupCube :: Cube a -> Side -> a
 lookupCube (Cube sqs) file = sqs ! file
 
 ------------------------------------------------------------------------------
@@ -137,67 +278,44 @@ bFace = niceFace "6  66 66 "
 cube = newCube [fFace,uFace,rFace,dFace,lFace,bFace]
 
 ------------------------------------------------------------------------------
-
-data Turn = Clock | OneEighty | CounterClock
-     deriving (Eq,Ord,Show)
-
-negateTurn :: Turn -> Turn
-negateTurn Clock = CounterClock
-negateTurn CounterClock = Clock
-negateTurn OneEighty = OneEighty
-
-class Rotate a where
-        rotate :: Turn -> a -> a                -- pointwise rotation
-
-instance Rotate (Face a) where
-        rotate d (Face a) = Face $ array corners [ (rotate d ix,a) | (ix,a) <- assocs a]
-
-instance Rotate (Rank,File) where
-        -- Memoize!
-        rotate Clock (r,f)
-	       = ( toEnum (1 + f')
-		 , toEnum (1 + negate r')
-	         )
-           where
-	           r' = fromEnum r - 1
-	           f' = fromEnum f - 1
-        rotate OneEighty rf =  rotate Clock . rotate Clock $ rf
-        rotate CounterClock rf =  rotate Clock . rotate Clock . rotate Clock $ rf
-
--- rotateCube :: Side -> Turn -> Cube Rotate
 {-
-rotateCube :: Side -> Turn -> Cube a -> Cube a  -- moves the sides
+class Permute f where
+        Id
+        permute :: (Idx x -> Idx ) -> f (a -> a)
+-}
+
+
+{-
+-- rotateCube :: Side -> Turn -> Cube Rotate
+rotateCube :: Side -> Turn -> Cube (a -> a)  -- moves the sides
 -- Symetry of axis
-rotateCube D turn = rotateCube U (negateTurn turn)
-rotateCube L turn = rotateCube R (negateTurn turn)
-rotateCube B turn = rotateCube F (negateTurn turn)
+rotateCube D turn = rotateCube U (inverse turn)
+rotateCube L turn = rotateCube R (inverse turn)
+rotateCube B turn = rotateCube F (inverse turn)
 
 -- Symetry of turns
 rotateCube side Clock        = rotateCubeClock side
-rotateCube side OneEighty    = rotateCube side Clock . rotateCube side Clock
-rotateCube side CounterClock = rotateCube side Clock . rotateCube side Clock . rotateCube side Clock
+--rotateCube side OneEighty    = rotateCube side Clock . rotateCube side Clock
+--rotateCube side CounterClock = rotateCube side Clock . rotateCube side Clock . rotateCube side Clock
 
-rotateCubeClock :: Side -> Cube a -> Cube a  -- moves the sides
-rotateCubeClock F = cube
-
+-- rotating U,R or F, by Clock.
+rotateCubeClock :: Side -> Cube (a -> a)  -- moves the sides
+rotateCubeClock F = undefined
+{-
+          Cube $ array (F,B) [ (s,case t of
+			    Nothing   -> face
+			    Just turn -> rotateFace turn face)
+		     | (s',(s,t)) <- zip [U,F,R,B,L,D] thisTurn
+		     , let face = faces ! s'
+		     ]
+  where
+	Just thisTurn = lookup side turns
+turns =
+  [(U,[(U,Just Clock),(R,Nothing),(B,Nothing),(L,Nothing),(F,Nothing),(D,Just CounterClock)])
+  ,(F,[(R,Just Clock),(F,Just Clock),(D,Just Clock),(B,Just CounterClock),(U,Just Clock),(L,Just Clock)])
+  ,(R,[(B,Just OneEighty),(U,Nothing),(R,Just Clock),(D,Just OneEighty),(L,Just CounterClock),(F,Nothing)])
+  ]
 -}
-
-opposites :: [(Side,Side)]
-opposites = [(F,B),(U,D),(R,L)] ++ map swap opposites
-
-swap :: (a,b) -> (b,a)
-swap (a,b) = (b,a)
-
-opposite :: Side -> Side
-opposite = fromJust . flip lookup opposites
-
--- This is about projecting to a two-D plain
-circ :: Side -> [Side]
-circ F = [U,R,D,L]
-circ U = [D,R,F,L]
-circ R = [U,B,D,F]
-circ o = flip (circ (opposite o))
-  where flip (x:xs) = x : reverse xs
 
 
 {-
@@ -258,4 +376,5 @@ cbCube bk cube = stack
   where
         Cube arr = cube
 
+-}
 -}
