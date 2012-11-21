@@ -117,6 +117,13 @@ instance Inverse Turn where
     inverse CounterClock = Clock
     inverse OneEighty = OneEighty
 
+class Rotate a where
+        rotate :: a -> a                -- rotate one turn clockwise
+        rotate = rotateBy (Just Clock)
+
+        rotateBy :: Maybe Turn -> a -> a      -- rotate by given
+        rotateBy = maybe id (promoteClock rotate)
+
 promoteClock :: (a -> a) -> Turn -> a -> a
 promoteClock f Clock        = f
 promoteClock f OneEighty    = f . f
@@ -136,10 +143,51 @@ rotate2 = promoteClock $ \ (r,f) ->
 rotateFace :: Turn -> Face a -> Face a
 rotateFace = permuteFace . forAllFace . rotate2 . inverse
 
+instance Rotate a => Rotate (Face a) where
+        rotateBy = maybe id (permuteFace . forAllFace . rotate2 . inverse)
+
+
 ---------------------------------------------------------------------------------
 
+data Direction = MinusOne | One
+        deriving (Eq,Ord,Enum,Ix)
+
+instance Show Direction where
+    show One = "+"
+    show MinusOne = "-"
+
+instance Inverse Direction where
+    inverse One = MinusOne
+    inverse MinusOne = One
+
+data Dimension = X | Y | Z
+        deriving (Eq,Ord,Show,Enum,Ix)
+
+type UnitVector = (Dimension,Direction)
+
+rotateVec :: Dimension -> UnitVector -> UnitVector
+rotateVec d (vd,n) | d == vd = (d,n)
+rotateVec X (Y,n) = (Z,inverse n)
+rotateVec X (Z,n) = (Y,n)
+rotateVec Y (X,n) = (Z,n)
+rotateVec Y (Z,n) = (X,inverse n)
+rotateVec Z (X,n) = (Y,inverse n)
+rotateVec Z (Y,n) = (X,n)
+
+
+
+---------------------------------------------------------------------------------
 data Side      = F | U | R | D | L | B
 		deriving (Eq,Ord,Enum,Show,Ix)
+
+unitVectorToSide :: UnitVector -> Side
+unitVectorToSide = undefined
+
+sideToUnitVector :: Side -> UnitVector
+sideToUnitVector = undefined
+
+{-
+
 
 sides = (F,B)
 
@@ -177,17 +225,19 @@ rotateSideClock front side
 
         neighbors = circ front
         rotate xs = tail xs ++ [head xs]
-
+-}
 ---------------------------------------------------------------------------------
 
 
-newtype Cube a = Cube (Array Side a)
+---------------------------------------------------------------------------------
+
+newtype Cube a = Cube (Array UnitVector a)
 	deriving (Eq,Ord)
 
+sides = ((X,MinusOne),(Z,One))
 
 elemsCube :: Cube a -> [a]
 elemsCube (Cube a) = elems a
-
 
 newCube :: [a] -> Cube a
 newCube faces = Cube $ array sides
@@ -195,14 +245,12 @@ newCube faces = Cube $ array sides
 		| (x,face) <- zip (range sides) faces
 		]
 
-
 instance Functor Cube where
   fmap f (Cube arr) = Cube (fmap f arr)
 
 instance Applicative Cube where
   pure a = Cube $ array sides [ (i,a) | i <- range sides ]
   (Cube f) <*> (Cube a) = Cube $ array sides [ (i,(f ! i) (a ! i)) | i <- range sides ]
-
 
 instance Show a => Show (Cube a) where
   show (Cube faces) =
@@ -212,27 +260,147 @@ instance Show a => Show (Cube a) where
 			     ] ++
 	d
      where
-	f = show (faces ! F)
-	u = show (faces ! U)
-	r = show (faces ! R)
-	d = show (faces ! D)
-	l = show (faces ! L)
-	b = show (faces ! B)
+	f = show (faces ! (Z,MinusOne))
+	u = show (faces ! (Y,One))
+	r = show (faces ! (X,One))
+	d = show (faces ! (Y,MinusOne))
+	l = show (faces ! (X,MinusOne))
+	b = show (faces ! (Z,One))
 
 
-permuteCube :: Cube Side -> Cube a -> Cube a
+permuteCube :: Cube UnitVector -> Cube a -> Cube a
 permuteCube (Cube coord) (Cube cube)
         = Cube $ array sides
                        [ (i,(cube ! (coord ! i)))
                        | i <- range sides
                        ]
 
-forAllCube :: (Side -> a) -> Cube a
+forAllCube :: (UnitVector -> a) -> Cube a
 forAllCube f = Cube $ array sides [ (i,f i) | i <- range sides ]
 
-rotateCube :: Side -> Turn -> Cube a -> Cube a
-rotateCube side turn = permuteCube (forAllCube (rotateSide side $ inverse turn))
+coordCube :: Cube UnitVector
+coordCube = forAllCube id
 
+-- how the squares are layed out
+projectCube :: Cube UnitVector
+projectCube = forAllCube $ \ (dim,dir) -> case (dim,dir) of
+        (X,_)        -> (Y,One)
+        (Y,MinusOne) -> (Z,MinusOne)
+        (Y,One)      -> (Z,One)
+        (Z,_)        -> (Y,One)
+
+------------------------------------------------------------------------------
+
+data Puzzle a = Puzzle (Cube (Face a))
+
+instance Show a => Show (Puzzle a) where
+        show (Puzzle p) = show p
+
+instance Functor Puzzle where
+  fmap f (Puzzle arr) = Puzzle (fmap (fmap f) arr)
+{-
+instance Applicative Cube where
+  pure a = Cube $ array sides [ (i,a) | i <- range sides ]
+  (Cube f) <*> (Cube a) = Cube $ array sides [ (i,(f ! i) (a ! i)) | i <- range sides ]
+-}
+
+--mkPuzzle :: [Cube a] -> Puzzle a
+--mkPuzzle
+
+arrow n = niceFace ['.',c,'.',c,c,c,c,'.',c]
+  where (c:_) = show n
+
+mkPuzzle = Puzzle . newCube
+
+puzzle = mkPuzzle (map arrow [1..6])
+
+rotateCube :: Dimension -> Turn -> Cube a -> Cube a
+rotateCube dim = permuteCube . forAllCube . promoteClock (rotateVec dim) . inverse
+
+rotateCube' :: (Rotate a) => Dimension -> Turn -> Cube a -> Cube a
+rotateCube' d t cube =
+        pure rotateBy
+         <*> rot
+         <*> rotateCube d t cube
+  where
+      f :: Face C -> ()
+      f = undefined
+      rot = pure rotAmount
+                  <*> coordCube
+                  <*> projectCube
+                  <*> (fmap (promoteClock (rotateVec d) t) $ rotateCube d t projectCube)
+
+      -- from Minus Side
+      dir X Z Y  = True
+      dir X Y Z  = False
+      dir Y Z X  = True
+      dir Z X Z  = False
+      dir Z Y X = True
+      dir Z X Y  = False
+
+      dir2 (d,MinusOne) a b = dir d a b
+      dir2 (d,One)      a b = not (dir d a b)
+
+      rotAmount _ v1 v2           | v1 == v2 = Nothing
+      rotAmount _ (vd1,_) (vd2,_) | vd1 == vd2 = Just OneEighty
+      rotAmount (d,n) (vd1,n1) (vd2,n2)
+                | dir2 (d,n) vd1 vd2 /= (n1 /= n2)
+                                            = Just Clock
+                | otherwise                 = Just CounterClock
+
+
+rotatePuzzle d t (Puzzle cube) =
+        pure (maybe id rotateFace)
+         <*> rot
+         <*> rotateCube d t cube
+  where
+      f :: Face C -> ()
+      f = undefined
+      rot = pure rotAmount
+                  <*> coordCube
+                  <*> projectCube
+                  <*> (fmap (promoteClock (rotateVec d) t) $ rotateCube d t projectCube)
+
+      -- from Minus Side
+      dir X Z Y  = True
+      dir X Y Z  = False
+      dir Y Z X  = True
+      dir Z X Z  = False
+      dir Z Y X = True
+      dir Z X Y  = False
+
+      dir2 (d,MinusOne) a b = dir d a b
+      dir2 (d,One)      a b = not (dir d a b)
+
+      rotAmount _ v1 v2           | v1 == v2 = Nothing
+      rotAmount _ (vd1,_) (vd2,_) | vd1 == vd2 = Just OneEighty
+      rotAmount (d,n) (vd1,n1) (vd2,n2)
+                | dir2 (d,n) vd1 vd2 /= (n1 /= n2)
+                                            = Just Clock
+                | otherwise                 = Just CounterClock
+
+
+--        $ pure (,) <*> projectCube
+--                   <*> (rotateCube d t (pure (,) <*> cube <*> projectCube))
+
+--s        cube
+
+--        pure (,) <*> cube <*> facedirections
+--        rotateCube
+
+
+
+
+{-
+rotateCubeSurfaces :: Side -> Turn -> Cube (Maybe Turn)
+
+
+rotateSideWith :: Side -> Turn -> Side -> Maybe Turn
+rotateSideWith front turn side =
+  where
+        -- where is my top
+        top = head (circ side)
+-}
 ------------------------------------------------------------------------------
 
 --rotate :: (XYZ,Turn) -> Side -> Side
@@ -250,23 +418,26 @@ rotateCube side turn = permuteCube (forAllCube (rotateSide side $ inverse turn))
 
 ------------------------------------------------------------------------------
 
-newtype X = X Char
+newtype C = C Char
 
-instance Show X where
-  show (X c) = [c]
+instance Show C where
+  show (C c) = [c]
+
+instance Rotate C where
+   rotate = id
 
 ------------------------------------------------------------------------------
 
-lookupCube :: Cube a -> Side -> a
+lookupCube :: Cube a -> UnitVector -> a
 lookupCube (Cube sqs) file = sqs ! file
 
 ------------------------------------------------------------------------------
 
 -- A way of showing a simple face
-niceFace :: String -> Face X
+niceFace :: String -> Face C
 niceFace str = newFace [[a,b,c],[d,e,f],[g,h,i]]
   where
-          [a,b,c,d,e,f,g,h,i] = map X str
+          [a,b,c,d,e,f,g,h,i] = map C str
 
 fFace = niceFace "11  1 111"
 uFace = niceFace "2 22 2222"
@@ -275,7 +446,12 @@ dFace = niceFace " 4  4  44"
 lFace = niceFace "555  5  5"
 bFace = niceFace "6  66 66 "
 
-cube = newCube [fFace,uFace,rFace,dFace,lFace,bFace]
+--cube = newCube [fFace,uFace,rFace,dFace,lFace,bFace]
+
+data Color = Red | Orange | Blue | Green | White | Yellow
+        deriving (Eq,Ord,Show)
+
+cube = newCube [Red,Orange,Blue,Green,White,Yellow]
 
 ------------------------------------------------------------------------------
 {-
