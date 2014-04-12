@@ -4,15 +4,15 @@ import Data.Ix
 
 import Rubik.Reverse as R
 
-data Abs = Minus | Zero | Plus
+data Abs = MinusOne | Zero | PlusOne
     deriving (Eq,Ord,Enum,Ix)
 
 instance Show Abs where
-    show Minus = "-"
-    show Zero  = "0"
-    show Plus  = "+"
+    show MinusOne = "-1"
+    show Zero     = "0"
+    show PlusOne  = "+1"
 
 instance R.Reverse Abs where
-    reverse Minus = Plus
+    reverse MinusOne = PlusOne
     reverse Zero  = Zero
-    reverse Plus  = Minus
+    reverse PlusOne  = MinusOne
