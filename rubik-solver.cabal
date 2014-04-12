@@ -15,7 +15,9 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  exposed-modules:     Rubik.Reverse
+  exposed-modules:     
+         Rubik.Reverse,
+         Rubik.Sign
   -- other-modules:       
   build-depends:       base < 5.0, array ==0.4.*
   hs-source-dirs:      src
