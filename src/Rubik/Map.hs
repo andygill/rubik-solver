@@ -33,3 +33,6 @@ instance Key k => Applicative (Map k) where
 -- do not depend on any specific order of this output
 elems :: Map k a -> [a] 
 elems (Map m) = M.elems m
+
+toList :: Map k a -> [(k,a)]
+toList (Map m) = M.toList m

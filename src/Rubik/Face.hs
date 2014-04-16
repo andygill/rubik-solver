@@ -42,7 +42,7 @@ instance Show a => Show (M.Map Square a) where
 		   ]
     where maxWidth = maximum $ map (length . show) $ map (f M.!) $ concat $ squares
           show' n  = take maxWidth (show n ++ repeat ' ')
-          bar      = [ "+" ++ concat [ take maxWidth (repeat '-') ++ "+" | _ <- [1..3]] ]
+          bar      = [ "+" ++ concat [ take maxWidth (repeat '-') ++ "+" | _ <- [1..3::Int]] ]
 
 -------------------------------------
 
@@ -51,12 +51,11 @@ rotate = undefined
 
 facePlacement :: Face (Int,Int)
 facePlacement = f <$> coord
-  where f (Square a b) = (rank a,file b)
-        rank Top    = -1
-        rank Middle = 0
-        rank Bottom = 1
-        file Left   = -1
-        file Center = 0
-        file Right  = 1
-        
+  where f (Square a b) = (file b,rank a)
+        rank Top    = 0
+        rank Middle = 1
+        rank Bottom = 2
+        file Left   = 0
+        file Center = 1
+        file Right  = 2
         
