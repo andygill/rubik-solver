@@ -5,7 +5,9 @@ import Prelude hiding (Left, Right)
 
 import Data.Array as A
 import Control.Applicative
+
 import Rubik.Map as M
+import Rubik.Turn as T
 
 data File = Left | Center | Right
     deriving (Eq,Ord,Enum,Show,Ix)
@@ -27,8 +29,7 @@ squares :: [[Square]]
 squares = [ [ Square a b | b <- [Left .. Right] ] |  a <- [Top .. Bottom]]
 
 instance Key Square where
-  coord = fill $ concat $ squares
-  (!) = M.lookup 
+  universe = concat squares
 
 type Face a = M.Map Square a
 
@@ -43,4 +44,19 @@ instance Show a => Show (M.Map Square a) where
           show' n  = take maxWidth (show n ++ repeat ' ')
           bar      = [ "+" ++ concat [ take maxWidth (repeat '-') ++ "+" | _ <- [1..3]] ]
 
+-------------------------------------
 
+rotate :: Turn -> Square -> Square
+rotate = undefined
+
+facePlacement :: Face (Int,Int)
+facePlacement = f <$> coord
+  where f (Square a b) = (rank a,file b)
+        rank Top    = -1
+        rank Middle = 0
+        rank Bottom = 1
+        file Left   = -1
+        file Center = 0
+        file Right  = 1
+        
+        

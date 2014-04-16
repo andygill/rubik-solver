@@ -11,6 +11,9 @@ data D3 = X | Y | Z
 -- From http://en.wikipedia.org/wiki/Right-hand_rule,
 -- Thumb ~ x, fore ~ y, other ~ z.
 
+
+-- :: Reverse dir => Vector dim dir -> Vector dim dir -> Vector dim dir
+
 -- (This is a cross-product, where the first argument is +1.)
 rightHandTurn :: Reverse dir => D3 -> Vector D3 dir -> Vector D3 dir
 rightHandTurn X (Vector X dir) = Vector X dir

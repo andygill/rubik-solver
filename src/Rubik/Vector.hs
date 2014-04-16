@@ -11,3 +11,6 @@ data Vector dim dir = Vector dim dir
 
 instance Reverse dir => Reverse (Vector dim dir) where
     reverse (Vector dim dir) = Vector dim (R.reverse dir)
+
+--class Cross dir where
+--    crossProduct :: Reverse dir => Vector dim dir -> Vector dim dir -> Vector dim dir
