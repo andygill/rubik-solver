@@ -5,6 +5,7 @@ import Graphics.Blank
 import Rubik.Map
 
 import Rubik.Face -- for test
+import Rubik.Cube -- for test
 import Graphics.Blank
 
 
@@ -17,8 +18,8 @@ drawMap pos dm = packShapes
           ]
         | row <- [0..rows]
         ]
-  where rows = maximum $ map fst $ elems pos   -- max row
-        cols = maximum $ map snd $ elems pos    -- max col
+  where rows = maximum $ map snd $ elems pos   -- max row
+        cols = maximum $ map fst $ elems pos    -- max col
         xs   = toList pos
         xs'  = [ (y,x) | (x,y) <- xs ]
 
@@ -34,12 +35,20 @@ empty = Shape (0,0) (return ())
 
 main = blankCanvas 3000 $ \ context -> do
         send context $ do
-                drawShape $ borderShape 0.1
-                       $ background "#202020" 0.01 0.1
+                drawShape 
+                  $ borderShape 0.1
+                  $ drawMap cubePlacement cube
+ where
+  cube = mkMap (borderShape 0.01 . face . f)
+                  where f F = "red"
+                        f B = "white"
+                        f _ = "orange"
+
+  face col = background "#202020" 0.01 0.1
                        $ drawMap facePlacement $ 
                            fmap (borderShape 0.02) $ 
                            fmap tile $
-                           mkMap (\ s -> "red")
+                           mkMap (\ s -> col)
 
 
 drawShape :: Shape -> Canvas ()
@@ -80,6 +89,8 @@ background col b cor shape@(Shape (x,y) _) = Shape (x',y') $ do
 
   where Shape (x',y') pic = borderShape b shape
                 
+--foreground :: String -> Float -> Float -> Shape -> Shape
+
 
 ----------------------------------------------------------------------------------------------------
 
