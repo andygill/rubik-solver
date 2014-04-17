@@ -15,3 +15,7 @@ instance Show Sign where
 instance R.Reverse Sign where
     reverse Minus = Plus
     reverse Plus  = Minus
+
+mulSign :: Sign -> Sign -> Sign
+mulSign x y | x == y    = Plus
+            | otherwise = Minus

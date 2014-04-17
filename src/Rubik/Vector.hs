@@ -3,14 +3,11 @@ module Rubik.Vector where
 import Data.Ix
 
 import Rubik.Reverse    as R
-import Rubik.Turn       as T
+import Rubik.Sign       as S
 
 -- Perhaps call Axis, or Unit.
-data Vector dim dir = Vector dim dir
+data Vector dim = Vector dim Sign
     deriving (Eq,Ord,Ix, Show)
 
-instance Reverse dir => Reverse (Vector dim dir) where
+instance Reverse (Vector dim) where
     reverse (Vector dim dir) = Vector dim (R.reverse dir)
-
---class Cross dir where
---    crossProduct :: Reverse dir => Vector dim dir -> Vector dim dir -> Vector dim dir

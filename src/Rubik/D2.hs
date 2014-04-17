@@ -11,8 +11,7 @@ data D2 = X | Y
    deriving (Eq,Ord,Show,Enum,Ix)
 
 -- (clockwise) turn
-clock :: Reverse dir => Vector D2 dir -> Vector D2 dir
-turn Clock (Vector X dir) = Vector Y (R.reverse dir)
-turn Clock (Vector Y dir) = Vector X dir
-turn _ _ = undefined
+turnD2 :: Vector D2 -> Vector D2
+turnD2 (Vector X dir) = Vector Y (R.reverse dir)
+turnD2 (Vector Y dir) = Vector X dir
 

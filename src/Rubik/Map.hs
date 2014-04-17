@@ -36,3 +36,7 @@ elems (Map m) = M.elems m
 
 toList :: Map k a -> [(k,a)]
 toList (Map m) = M.toList m
+
+--instance (Show k, Show a) => Show (Map k a) where
+--        show (Map m) = show $ M.toList m
+

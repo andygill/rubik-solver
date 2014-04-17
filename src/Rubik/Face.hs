@@ -6,12 +6,17 @@ import Prelude hiding (Left, Right)
 import Data.Array as A
 import Control.Applicative
 
-import Rubik.Map as M
-import Rubik.Turn as T
+import Rubik.Map        as M
+import Rubik.Turn       as T
+import Rubik.Reverse    as R
 
 data File = Left | Center | Right
     deriving (Eq,Ord,Enum,Show,Ix)
 
+instance Reverse File where
+    reverse Left   = Right
+    reverse Center = Center
+    reverse Right  = Right
 
 data Rank = Top | Middle | Bottom
     deriving (Eq,Ord,Enum,Show,Ix)
@@ -46,8 +51,6 @@ instance Show a => Show (M.Map Square a) where
 
 -------------------------------------
 
-rotate :: Turn -> Square -> Square
-rotate = undefined
 
 facePlacement :: Face (Int,Int)
 facePlacement = f <$> coord
@@ -59,3 +62,22 @@ facePlacement = f <$> coord
         file Center = 1
         file Right  = 2
         
+
+type Permutation a = a -> a
+
+clockwise :: Permutation Square
+clockwise (Square r f) = Square (case f of
+                                   Left   -> Top
+                                   Center -> Middle
+                                   Right  -> Bottom)
+                                (case r of
+                                   Top    -> Right
+                                   Middle -> Center
+                                   Bottom -> Left)
+
+
+rotateBy :: Turn -> Square -> Square
+rotateBy NoTurn       = id
+rotateBy Clock        = clockwise
+rotateBy OneEighty    = clockwise . clockwise
+rotateBy CounterClock = clockwise . clockwise . clockwise

@@ -6,6 +6,7 @@ import Rubik.Map
 
 import Rubik.Face -- for test
 import Rubik.Cube -- for test
+import Rubik.Color -- for test
 import Graphics.Blank
 
 
@@ -39,14 +40,14 @@ main = blankCanvas 3000 $ \ context -> do
                   $ borderShape 0.1
                   $ drawMap cubePlacement cube
  where
-  cube = mkMap (borderShape 0.01 . face . f)
-                  where f F = "red"
-                        f B = "white"
-                        f _ = "orange"
+  cube = fmap (borderShape 0.01)
+       $ fmap face
+       $ fmap showColor
+       $ start
 
   face col = background "#202020" 0.01 0.1
                        $ drawMap facePlacement $ 
-                           fmap (borderShape 0.02) $ 
+                           fmap (borderShape 0.05) $ 
                            fmap tile $
                            mkMap (\ s -> col)
 

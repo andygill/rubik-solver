@@ -17,9 +17,17 @@ cabal-version:       >=1.8
 library
   exposed-modules:     
          Rubik.Abs,
+         Rubik.Color,
+         Rubik.Cube,
+         Rubik.D2,
+         Rubik.D3,
+         Rubik.Drawing,
+         Rubik.Map,
          Rubik.Reverse,
-         Rubik.Sign
+         Rubik.Sign,
+         Rubik.Turn,
+         Rubik.Vector
   -- other-modules:       
-  build-depends:       base < 5.0, array ==0.4.*
+  build-depends:       base < 5.0, array ==0.5.*, blank-canvas==0.3.*, containers==0.5.*
   hs-source-dirs:      src
 
