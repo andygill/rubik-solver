@@ -11,7 +11,7 @@ data D2 = X | Y
    deriving (Eq,Ord,Show,Enum,Ix)
 
 -- (clockwise) turn
-turnD2 :: Vector D2 -> Vector D2
-turnD2 (Vector X dir) = Vector Y (R.reverse dir)
-turnD2 (Vector Y dir) = Vector X dir
+turnD2 :: Axis D2 -> Axis D2
+turnD2 (Axis X dir) = Axis Y (R.reverse dir)
+turnD2 (Axis Y dir) = Axis X dir
 
