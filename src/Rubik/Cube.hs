@@ -5,7 +5,7 @@ import Control.Applicative
 
 import Rubik.Map as M
 import Rubik.Turn as T
-import Rubik.Vector as V
+import Rubik.Axis as V
 import Rubik.Sign       as S
 import Rubik.D3         as D3
 

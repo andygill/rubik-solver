@@ -6,7 +6,7 @@ import Data.Char(toLower)
 import Rubik.Map
 import Rubik.Cube
 import Rubik.Sign
-import Rubik.Vector
+import Rubik.Axis
 
 import Rubik.D3
 

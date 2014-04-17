@@ -3,7 +3,7 @@ module Rubik.D3 where
 import Data.Ix
 
 import Rubik.Reverse as R
-import Rubik.Vector  as V
+import Rubik.Axis  as V
 import Rubik.Sign    as S
 import Rubik.Map     as M
 

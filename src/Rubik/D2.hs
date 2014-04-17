@@ -3,7 +3,7 @@ module Rubik.D2 where
 import Data.Ix
 
 import Rubik.Reverse as R
-import Rubik.Vector  as V
+import Rubik.Axis  as V
 import Rubik.Turn    as T
 
 -- http://en.wikipedia.org/wiki/Cartesian_coordinate_system
