@@ -3,7 +3,6 @@ module Rubik.Drawing where
 import Graphics.Blank
 
 import Rubik.Shape
-import Rubik.Map
 
 import Rubik.Face -- for test
 import Rubik.Cube -- for test

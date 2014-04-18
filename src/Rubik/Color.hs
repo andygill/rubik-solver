@@ -3,7 +3,7 @@ module Rubik.Color where
 import Data.Array(Ix)
 import Data.Char(toLower)
 
-import Rubik.Map
+import Rubik.Key
 import Rubik.Cube
 import Rubik.Sign
 import Rubik.Axis
@@ -13,10 +13,13 @@ import Rubik.D3
 data Color = Red | Orange | White | Blue | Green | Yellow
 		deriving (Eq,Ord,Enum,Show,Ix)
 
+instance Key Color where
+    universe = [ Red, Orange, White, Blue, Green, Yellow ]
+
+-- to HTML5 color
 showColor :: Color -> String
 showColor = map toLower . show
 
--- F | U | R | D | L | B
 start :: Cube Color
 start = f
   where f (Axis Z Plus)  = Green

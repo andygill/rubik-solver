@@ -23,7 +23,7 @@ library
          Rubik.D2,
          Rubik.D3,
          Rubik.Drawing,
-         Rubik.Map,
+         Rubik.Key,
          Rubik.Reverse,
          Rubik.Shape,
          Rubik.Sign,
