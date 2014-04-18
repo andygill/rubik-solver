@@ -78,3 +78,4 @@ rotateBy NoTurn       = id
 rotateBy Clock        = clockwise
 rotateBy OneEighty    = clockwise . clockwise
 rotateBy CounterClock = clockwise . clockwise . clockwise
+

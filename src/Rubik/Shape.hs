@@ -4,6 +4,9 @@ import Graphics.Blank
 
 import Rubik.Key
 
+shape :: Shape -> IO ()
+shape s = blankCanvas 3000 $ \ context -> send context $ drawShape $ borderShape 0.1 s
+
 -- A Drawing is a picture with a finite size.
 data Shape = Shape (Float,Float) (Canvas ())
 
@@ -99,3 +102,18 @@ roundedBox radius width height = do
   closePath()
   fill()
   restore()
+
+-- overlay
+overlay :: Shape -> Shape -> Shape
+overlay (Shape (x,y) c) (Shape (x',y') c') = Shape (max x x', max y y') $ do
+        -- does not center yet
+        c
+        c'
+
+text :: Int -> String -> Shape
+text d str = Shape (1,1) $ do
+    save()
+    scale (1/20,1/20)
+    font $ show d ++ "px Calibri"
+    fillText(str,0,fromIntegral d * 0.70)
+    restore()

@@ -9,6 +9,8 @@ import Rubik.Cube -- for test
 import Rubik.Color -- for test
 import Graphics.Blank
 
+
+main :: IO ()
 main = blankCanvas 3000 $ \ context -> do
         send context $ do
                 drawShape 
@@ -24,7 +26,7 @@ main = blankCanvas 3000 $ \ context -> do
                        $ drawMap facePlacement $ 
                            fmap (borderShape 0.05) $ 
                            fmap tile $
-                           (const col)
+                           pure col
 
 
                 

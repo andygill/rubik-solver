@@ -20,7 +20,6 @@ instance Key Side where
 
 type Cube a = Axis D3 -> a
 
-
 -- Where is this side placed on a 2D plane.
 cubePlacement :: Cube (Int,Int)
 cubePlacement = f
