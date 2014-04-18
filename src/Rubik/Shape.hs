@@ -2,29 +2,30 @@ module Rubik.Shape where
 
 import Graphics.Blank
 
-import Rubik.Map
+import Rubik.Key
 
 -- A Drawing is a picture with a finite size.
 data Shape = Shape (Float,Float) (Canvas ())
 
 -- Draw map, aka picture in 2D of a space.
-drawMap :: (Ord k) => Map k (Int,Int) -> Map k Shape -> Shape
+drawMap :: (Key k) => (k -> (Int,Int)) -> (k -> Shape) -> Shape
 drawMap pos dm = packShapes
         [ [ case lookup (col,row) xs' of
-              Just k -> dm ! k
+              Just k -> dm k
               Nothing -> emptyShape
           | col <- [0..cols]
           ]
         | row <- [0..rows]
         ]
-  where rows = maximum $ map snd $ elems pos   -- max row
-        cols = maximum $ map fst $ elems pos    -- max col
-        xs   = toList pos
+  where rows = maximum $ map snd $ map pos universe   -- max row
+        cols = maximum $ map fst $ map pos universe   -- max col
+        xs   = [ (k,pos k) | k <- universe ]
         xs'  = [ (y,x) | (x,y) <- xs ]
 
 emptyShape :: Shape
 emptyShape = Shape (0,0) (return ())
 
+-- Draw a compound shape as a large picutre
 drawShape :: Shape -> Canvas ()
 drawShape (Shape (w',h') picture) = do
         (w,h) <- size
@@ -39,6 +40,7 @@ drawShape (Shape (w',h') picture) = do
         picture
         restore()
 
+-- put a sized border round a shape.
 borderShape :: Float -> Shape -> Shape
 borderShape b (Shape (h,w) picture) = Shape (h+2*b,w+2*b) $ do
         save()
@@ -46,6 +48,7 @@ borderShape b (Shape (h,w) picture) = Shape (h+2*b,w+2*b) $ do
         picture
         restore()
 
+-- Rubik's tile.
 tile :: String -> Shape
 tile col = Shape (1,1) $ do
           save()
@@ -60,7 +63,6 @@ background col b cor shape@(Shape (x,y) _) = Shape (x',y') $ do
         roundedBox cor x' y'
         restore()
         pic
-
   where Shape (x',y') pic = borderShape b shape
 
 packShapes :: [[Shape]] -> Shape

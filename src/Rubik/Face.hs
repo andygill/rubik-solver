@@ -6,7 +6,7 @@ import Prelude hiding (Left, Right)
 import Data.Array as A
 import Control.Applicative
 
-import Rubik.Map        as M
+import Rubik.Key        as K
 import Rubik.Turn       as T
 import Rubik.Reverse    as R
 
@@ -18,8 +18,19 @@ instance Reverse File where
     reverse Center = Center
     reverse Right  = Right
 
+instance Key File where
+    universe = [Left, Center, Right]
+
 data Rank = Top | Middle | Bottom
     deriving (Eq,Ord,Enum,Show,Ix)
+
+instance Reverse Rank where
+    reverse Top    = Bottom
+    reverse Middle = Middle
+    reverse Bottom = Top
+    
+instance Key Rank where
+    universe = [Top, Middle, Bottom]
 
 data Square = Square Rank File
     deriving (Eq,Ord,Ix)
@@ -27,34 +38,20 @@ data Square = Square Rank File
 instance Show Square where
     show (Square r f) = [ head (show r) , head (show f) ]
 
+instance Key Square where
+    universe = [ Square r f | r <- universe, f <- universe ]
+
 corners :: (Square,Square)
 corners = (Square Top Left,Square Bottom Right)
 
 squares :: [[Square]]
 squares = [ [ Square a b | b <- [Left .. Right] ] |  a <- [Top .. Bottom]]
 
-instance Key Square where
-  universe = concat squares
-
-type Face a = M.Map Square a
-
-instance Show a => Show (M.Map Square a) where
-   show f = unlines $
-                   bar ++
-		   concat
-	           [ [ "|" ++ concat [ show' (f M.! (Square rank file)) ++ "|" | file <- [Left  .. Right] ] ] ++ bar
-		     | rank <- [Top .. Bottom ]
-		   ]
-    where maxWidth = maximum $ map (length . show) $ map (f M.!) $ concat $ squares
-          show' n  = take maxWidth (show n ++ repeat ' ')
-          bar      = [ "+" ++ concat [ take maxWidth (repeat '-') ++ "+" | _ <- [1..3::Int]] ]
-
--------------------------------------
-
+type Face a = Square -> a
 
 facePlacement :: Face (Int,Int)
-facePlacement = f <$> coord
-  where f (Square a b) = (file b,rank a)
+facePlacement (Square a b) = (file b,rank a)
+  where
         rank Top    = 0
         rank Middle = 1
         rank Bottom = 2

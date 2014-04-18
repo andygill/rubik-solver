@@ -5,7 +5,7 @@ import Data.Ix
 import Rubik.Reverse as R
 import Rubik.Axis  as V
 import Rubik.Sign    as S
-import Rubik.Map     as M
+import Rubik.Key     as K
 
 data D3 = X | Y | Z
         deriving (Eq,Ord,Show,Enum,Ix)

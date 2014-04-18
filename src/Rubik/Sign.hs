@@ -3,7 +3,7 @@ module Rubik.Sign where
 import Data.Ix
 
 import Rubik.Reverse as R
-import Rubik.Map
+import Rubik.Key
 
 data Sign = Minus | Plus
     deriving (Eq,Ord,Enum,Ix)

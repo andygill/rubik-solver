@@ -3,7 +3,7 @@ module Rubik.Cube where
 import Data.Array as A
 import Control.Applicative
 
-import Rubik.Map as M
+import Rubik.Key as K
 import Rubik.Turn as T
 import Rubik.Axis as V
 import Rubik.Sign       as S
@@ -18,12 +18,12 @@ sides = [F .. B]
 instance Key Side where
   universe = sides
 
-type Cube a = M.Map (Axis D3) a
+type Cube a = Axis D3 -> a
 
 
 -- Where is this side placed on a 2D plane.
 cubePlacement :: Cube (Int,Int)
-cubePlacement = f <$> coord
+cubePlacement = f
   where f (Axis Z Plus)  = (1,1)
         f (Axis Z Minus) = (1,0)
         f (Axis Y Plus)  = (2,1)

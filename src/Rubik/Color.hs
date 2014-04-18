@@ -18,7 +18,7 @@ showColor = map toLower . show
 
 -- F | U | R | D | L | B
 start :: Cube Color
-start = mkMap f
+start = f
   where f (Axis Z Plus)  = Green
         f (Axis Z Minus) = White
         f (Axis Y Plus)  = Red

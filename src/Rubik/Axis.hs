@@ -4,7 +4,7 @@ import Data.Ix
 
 import Rubik.Reverse    as R
 import Rubik.Sign       as S
-import Rubik.Map        as M
+import Rubik.Key        as K
 
 -- Perhaps call Axis, or Unit.
 data Axis dim = Axis dim Sign

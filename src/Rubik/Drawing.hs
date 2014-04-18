@@ -25,7 +25,7 @@ main = blankCanvas 3000 $ \ context -> do
                        $ drawMap facePlacement $ 
                            fmap (borderShape 0.05) $ 
                            fmap tile $
-                           mkMap (\ s -> col)
+                           (const col)
 
 
                 

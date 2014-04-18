@@ -1,6 +1,7 @@
 module Rubik.Map where
 
-import qualified Data.Map as M
+{-
+        import qualified Data.Map as M
 import Control.Applicative
         
 newtype Map k a = Map (M.Map k a)
@@ -40,3 +41,4 @@ toList (Map m) = M.toList m
 --instance (Show k, Show a) => Show (Map k a) where
 --        show (Map m) = show $ M.toList m
 
+-}
