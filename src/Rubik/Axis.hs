@@ -13,7 +13,6 @@ data Axis dim = Axis dim Sign
 instance Reverse (Axis dim) where
     reverse (Axis dim dir) = Axis dim (R.reverse dir)
 
-
 instance Key d => Key (Axis d) where
    universe = [ Axis d s | d <- universe, s <- universe ]
    
