@@ -25,6 +25,7 @@ library
          Rubik.Drawing,
          Rubik.Map,
          Rubik.Reverse,
+         Rubik.Shape,
          Rubik.Sign,
          Rubik.Turn
   -- other-modules:       

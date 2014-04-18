@@ -1,20 +1,18 @@
-module Rubik.Drawing where
+module Rubik.Shape where
 
 import Graphics.Blank
 
 import Rubik.Map
 
-import Rubik.Face -- for test
-import Rubik.Cube -- for test
-import Rubik.Color -- for test
-import Graphics.Blank
+-- A Drawing is a picture with a finite size.
+data Shape = Shape (Float,Float) (Canvas ())
 
-
+-- Draw map, aka picture in 2D of a space.
 drawMap :: (Ord k) => Map k (Int,Int) -> Map k Shape -> Shape
 drawMap pos dm = packShapes
         [ [ case lookup (col,row) xs' of
               Just k -> dm ! k
-              Nothing -> empty
+              Nothing -> emptyShape
           | col <- [0..cols]
           ]
         | row <- [0..rows]
@@ -24,33 +22,8 @@ drawMap pos dm = packShapes
         xs   = toList pos
         xs'  = [ (y,x) | (x,y) <- xs ]
 
-{-
-example :: Drawing
-example = drawMap facePlacement (return (1,2))
--}
-
--- A Drawing is a picture with a finite size.
-data Shape = Shape (Float,Float) (Canvas ())
-
-empty = Shape (0,0) (return ())
-
-main = blankCanvas 3000 $ \ context -> do
-        send context $ do
-                drawShape 
-                  $ borderShape 0.1
-                  $ drawMap cubePlacement cube
- where
-  cube = fmap (borderShape 0.01)
-       $ fmap face
-       $ fmap showColor
-       $ start
-
-  face col = background "#202020" 0.01 0.1
-                       $ drawMap facePlacement $ 
-                           fmap (borderShape 0.05) $ 
-                           fmap tile $
-                           mkMap (\ s -> col)
-
+emptyShape :: Shape
+emptyShape = Shape (0,0) (return ())
 
 drawShape :: Shape -> Canvas ()
 drawShape (Shape (w',h') picture) = do
@@ -89,14 +62,6 @@ background col b cor shape@(Shape (x,y) _) = Shape (x',y') $ do
         pic
 
   where Shape (x',y') pic = borderShape b shape
-                
---foreground :: String -> Float -> Float -> Shape -> Shape
-
-
-----------------------------------------------------------------------------------------------------
-
---beside :: Shape -> Shape -> Shape
---beside g h = (x,y) -> 
 
 packShapes :: [[Shape]] -> Shape
 packShapes shapes = Shape (cols * maxW,rows * maxH) $ do
@@ -114,7 +79,7 @@ packShapes shapes = Shape (cols * maxW,rows * maxH) $ do
     maxW = maximum [ w | Shape (w,_) _ <- concat shapes ]
     maxH = maximum [ h | Shape (_,h) _ <- concat shapes ]
 
-----------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
 roundedBox :: Float -> Float -> Float -> Canvas ()
 roundedBox radius width height = do
