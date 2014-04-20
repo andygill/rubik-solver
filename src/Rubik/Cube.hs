@@ -23,12 +23,12 @@ type Cube a = Axis D3 -> a
 -- Where is this side placed on a 2D plane.
 cubePlacement :: Cube (Int,Int)
 cubePlacement = f
-  where f (Axis Z Plus)  = (1,1)
-        f (Axis Z Minus) = (1,0)
-        f (Axis Y Plus)  = (2,1)
-        f (Axis Y Minus) = (1,2)
-        f (Axis X Plus)  = (0,1)
-        f (Axis X Minus) = (3,1)
+  where f (Axis X Plus)  = (1,0)
+        f (Axis X Minus) = (1,2)
+        f (Axis Y Plus)  = (0,1)
+        f (Axis Y Minus) = (2,1)
+        f (Axis Z Plus)  = (1,1)
+        f (Axis Z Minus) = (3,1)
 
 {-
 sideToAxis :: Side -> Axis D3
@@ -47,3 +47,6 @@ axisToSize :: Axis D3 -> Side
 
 --rotateBy :: F -> F -> F
 -}
+
+
+
