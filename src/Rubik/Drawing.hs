@@ -8,7 +8,7 @@ import Rubik.Face -- for test
 import Rubik.Cube -- for test
 import Rubik.Color -- for test
 import Graphics.Blank
-
+import Control.Applicative
 
 main :: IO ()
 main = blankCanvas 3000 $ \ context -> do
