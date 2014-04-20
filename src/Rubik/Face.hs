@@ -73,9 +73,20 @@ clockwise (Square r f) = Square (case f of
                                    Bottom -> Left)
 
 
-rotateBy :: Turn -> Square -> Square
-rotateBy NoTurn       = id
-rotateBy Clock        = clockwise
-rotateBy OneEighty    = clockwise . clockwise
-rotateBy CounterClock = clockwise . clockwise . clockwise
+{-
+                                   
+rotateBy :: Turn -> Face a -> Face a
+rotateBy NoTurn       f = f
+rotateBy Clock        f = f . clockwise . clockwise . clockwise
+--rotateBy OneEighty    = clockwise . clockwise
+--rotateBy CounterClock = 
 
+-}
+
+instance Rotate Square where
+  rotateBy NoTurn       = id
+  rotateBy Clock        = clockwise
+  rotateBy OneEighty    = clockwise . clockwise
+  rotateBy CounterClock = clockwise . clockwise . clockwise
+          
+                           
