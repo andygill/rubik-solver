@@ -22,3 +22,11 @@ turnToInteger NoTurn       = 0
 turnToInteger Clock        = 1
 turnToInteger OneEighty    = 2
 turnToInteger CounterClock = 3
+
+class Rotate a where
+  rotateBy :: Turn -> a -> a
+
+-- We invert the rotate because it is the co-varient position
+instance Rotate a => Rotate (a -> b) where
+  rotateBy t f a = f (rotateBy (-t) a)
+  
