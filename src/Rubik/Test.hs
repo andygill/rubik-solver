@@ -52,13 +52,13 @@ main = shape $ packShapes
 
 -- notations
 z :: Cube (Face a) -> Cube (Face a)
-z c0 = (\ (f,o) m -> rotateBy (toTurn o m) f) <$> c2 <*> w
+z c0 = (\ (f,o) m -> f {-rotateBy (toTurn o m) f-}) <$> c2 <*> w
   where
         c1 = (,) <$> c0 <*> cubeFaceDir
         f a b _ = a
         c2 = rotateD3 o t c1
-        t = Clock
-        o = Axis Z Plus  
+        t =  Clock
+        o = Axis Y Plus
         w = fmap (rotateD3 o t) cubeFaceDir
 
 t r o = fmap (rotateD3 o r) (cubeFaceDir)
@@ -90,7 +90,7 @@ toTurn (Axis d1 s1, Axis d2 s2) (Axis d3 s3, Axis d4 s4)
     swapped (Minus,Plus) (Plus,Plus)   = CounterClock
     swapped (Minus,Plus) (Minus,Plus)  = NoTurn
 --    swapped (Minus,Plus) (Minus,Minus) = Clock
-    swapped _ _ = error $ show ((Axis d1 s1, Axis d2 s2),(Axis d3 s3, Axis d4 s4))
+    swapped _ _ = error $ "BAD: " ++ show ((Axis d1 s1, Axis d2 s2),(Axis d3 s3, Axis d4 s4))
     
 toTurn' (Plus,Plus)   = NoTurn
 toTurn' (Plus,Minus)  = Clock

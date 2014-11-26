@@ -26,6 +26,8 @@ main = do
     quickCheck prop_1_turnD3
     quickCheck prop_2_turnD3
     quickCheck prop_3_turnD3
+    quickCheck prop_4_turnD3
+    quickCheck prop_5_turnD3
     
 
 
@@ -42,6 +44,17 @@ prop_2_turnD3 a1 a2 = (a1 /= a2  && a1 /= R.reverse a2) ==> turnD3 a1 (turnD3 a1
 -- turn four times returns to original vector
 prop_3_turnD3 :: Axis D3 -> Axis D3 -> Bool
 prop_3_turnD3 a1 a2 = turnD3 a1 (turnD3 a1 (turnD3 a1 (turnD3 a1 a2))) == a2
+
+prop_4_turnD3 :: Axis D3 -> Axis D3 -> Property
+prop_4_turnD3 a1 a2 = (a1 /= a2  && a1 /= R.reverse a2) 
+        ==> turnD3 a1 (turnD3 a1 a2) == R.reverse (turnD3 (R.reverse a1) (turnD3 a1 a2))
+
+prop_5_turnD3 :: Axis D3 -> Axis D3 -> Axis D3 -> Property
+prop_5_turnD3 a1 a2 a3 = (diff_axis a1 a3 && diff_axis a2 a3 && diff_axis a1 a2)
+        ==> turnD3 a1 (turnD3 a2 a3) /= turnD3 a2 (turnD3 a1 a3)
+
+diff_axis :: Axis D3 -> Axis D3 -> Bool
+diff_axis a1 a2 = a1 /= a2  && a1 /= R.reverse a2
 
 -- The instances
 instance Arbitrary Abs where

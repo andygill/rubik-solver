@@ -22,10 +22,12 @@ showColor = map toLower . show
 
 start :: Cube Color
 start = f
-  where f (Axis Z Plus)  = Green
-        f (Axis Z Minus) = White
-        f (Axis Y Plus)  = Red
-        f (Axis Y Minus) = Yellow
-        f (Axis X Plus)  = Orange
-        f (Axis X Minus) = Blue
+  where f (Axis Z Plus)  = Orange
+        f (Axis Z Minus) = Red
+        f (Axis Y Plus)  = Yellow
+        f (Axis Y Minus) = White
+        f (Axis X Plus)  = Blue 
+        f (Axis X Minus) = Green
+
+
 

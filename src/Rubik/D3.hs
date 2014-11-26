@@ -16,18 +16,18 @@ instance Key D3 where
    universe = [ X, Y, Z ]
 
 -- From http://en.wikipedia.org/wiki/Right-hand_rule,
--- Thumb ~ x, fore ~ y, other ~ z. (This means that z is +ve towards you.)
+-- Thumb ~ z, fore ~ y, other ~ x. (This means that z is +ve towards you.)
 
 -- From the point of the first argument, turn the second argument clockwise.
 turnD3 :: Axis D3 -> Axis D3 -> Axis D3
 turnD3 (Axis a1 d1) (Axis a2 d2) 
         | a1 == a2           = Axis a2 d2
-        | a1 == X && a2 == Y = Axis Z $ R.reverse d 
-        | a1 == X && a2 == Z = Axis Y $ d
-        | a1 == Y && a2 == X = Axis Z $ d
-        | a1 == Y && a2 == Z = Axis X $ R.reverse d
-        | a1 == Z && a2 == X = Axis Y $ R.reverse d
-        | a1 == Z && a2 == Y = Axis X $ d
+        | a1 == X && a2 == Y = Axis Z $ d
+        | a1 == X && a2 == Z = Axis Y $ R.reverse d 
+        | a1 == Y && a2 == X = Axis Z $ R.reverse d
+        | a1 == Y && a2 == Z = Axis X $ d
+        | a1 == Z && a2 == X = Axis Y $ d
+        | a1 == Z && a2 == Y = Axis X $ R.reverse d
   where d = d1 `mulSign` d2
 
 
@@ -46,3 +46,4 @@ instance Twist (Axis D3) where
 
 instance (Twist a, Twist b) => Twist (a,b) where
   rotateD3 d t (a,b) = (rotateD3 d t a, rotateD3 d t b)
+  
