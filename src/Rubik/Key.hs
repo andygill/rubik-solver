@@ -15,7 +15,10 @@ elems f = map f universe
 toList :: Key k => (k -> a) -> [(k,a)]
 toList f = [ (k,f k) | k <- universe ]
 
-newtype Fun a b = Fun (a -> b)
+newtype Finite a b = Finite (a -> b)
 
-instance (Show a, Key a, Show b) => Show (Fun a b) where
-  show (Fun f) = show [ (a,f a) | a <- universe ]          
+instance (Show a, Key a, Show b) => Show (Finite a b) where
+  show (Finite f) = show [ (a,f a) | a <- universe ]          
+
+instance Functor (Finite a) where
+  fmap f (Finite g) = Finite (f . g)

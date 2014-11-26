@@ -29,6 +29,7 @@ library
          Rubik.Sign,
          Rubik.Turn
   -- other-modules:       
-  build-depends:       base < 5.0, array ==0.5.*, blank-canvas==0.3.*, containers==0.5.*
+  build-depends:       base < 5.0, array ==0.5.*, blank-canvas==0.5.*, text,
+                       containers==0.5.*
   hs-source-dirs:      src
 

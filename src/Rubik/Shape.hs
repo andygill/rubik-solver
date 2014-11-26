@@ -1,14 +1,19 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Rubik.Shape where
 
 import Graphics.Blank
+import Data.Text(Text,pack)
 
 import Rubik.Key
 
 shape :: Shape -> IO ()
-shape s = blankCanvas 3000 $ \ context -> send context $ drawShape $ borderShape 0.1 s
+shape s = blankCanvas 3000 $ \ context -> send context $ drawShape context $ borderShape 0.1 s
 
 -- A Drawing is a picture with a finite size.
-data Shape = Shape (Float,Float) (Canvas ())
+data Shape = Shape (Double,Double) (Canvas ())
+
+instance Show Shape where
+  show (Shape xy _) = show xy
 
 -- Draw map, aka picture in 2D of a space.
 drawMap :: (Key k) => (k -> (Int,Int)) -> (k -> Shape) -> Shape
@@ -29,9 +34,9 @@ emptyShape :: Shape
 emptyShape = Shape (0,0) (return ())
 
 -- Draw a compound shape as a large picutre
-drawShape :: Shape -> Canvas ()
-drawShape (Shape (w',h') picture) = do
-        (w,h) <- size
+drawShape :: DeviceContext -> Shape -> Canvas ()
+drawShape cxt (Shape (w',h') picture) = do
+        (w,h) <- return (width cxt, height cxt)
         let w1 = w / w'
         let h1 = h / h'
         let s = min w1 h1
@@ -44,7 +49,7 @@ drawShape (Shape (w',h') picture) = do
         restore()
 
 -- put a sized border round a shape.
-borderShape :: Float -> Shape -> Shape
+borderShape :: Double -> Shape -> Shape
 borderShape b (Shape (h,w) picture) = Shape (h+2*b,w+2*b) $ do
         save()
         translate (b,b)
@@ -52,14 +57,14 @@ borderShape b (Shape (h,w) picture) = Shape (h+2*b,w+2*b) $ do
         restore()
 
 -- Rubik's tile.
-tile :: String -> Shape
+tile :: Text -> Shape
 tile col = Shape (1,1) $ do
           save()
           fillStyle col
           roundedBox (1/10) 1 1
           restore()
 
-background :: String -> Float -> Float -> Shape -> Shape
+background :: Text -> Double -> Double -> Shape -> Shape
 background col b cor shape@(Shape (x,y) _) = Shape (x',y') $ do
         save()
         fillStyle col
@@ -86,7 +91,7 @@ packShapes shapes = Shape (cols * maxW,rows * maxH) $ do
 
 ------------------------------------------------------------------------------------------------------
 
-roundedBox :: Float -> Float -> Float -> Canvas ()
+roundedBox :: Double -> Double -> Double -> Canvas ()
 roundedBox radius width height = do
   save()
   beginPath()
@@ -114,6 +119,6 @@ text :: Int -> String -> Shape
 text d str = Shape (1,1) $ do
     save()
     scale (1/20,1/20)
-    font $ show d ++ "px Calibri"
-    fillText(str,0,fromIntegral d * 0.70)
+    font $ pack $ show d ++ "px Calibri"
+    fillText(pack str,0,fromIntegral d * 0.70)
     restore()

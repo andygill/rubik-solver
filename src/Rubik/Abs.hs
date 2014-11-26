@@ -16,3 +16,4 @@ instance R.Reverse Abs where
     reverse MinusOne = PlusOne
     reverse Zero  = Zero
     reverse PlusOne  = MinusOne
+

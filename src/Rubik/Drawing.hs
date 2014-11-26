@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Rubik.Drawing where
 
 import Graphics.Blank
@@ -10,16 +11,18 @@ import Rubik.Color -- for test
 import Graphics.Blank
 import Control.Applicative
 
+import Data.Text(Text,pack)
+
 main :: IO ()
 main = blankCanvas 3000 $ \ context -> do
         send context $ do
-                drawShape 
+                drawShape context
                   $ borderShape 0.1
                   $ drawMap cubePlacement cube
  where
   cube = fmap (borderShape 0.01)
        $ fmap face
-       $ fmap showColor
+       $ fmap (pack . showColor)
        $ start
 
   face col = background "#202020" 0.01 0.1

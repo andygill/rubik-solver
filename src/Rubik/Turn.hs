@@ -1,6 +1,7 @@
 module Rubik.Turn where
         
 import Data.Array
+import Rubik.Key
 
 data Turn = NoTurn | Clock | OneEighty | CounterClock
    deriving (Eq,Ord,Show,Enum,Ix)
@@ -29,4 +30,11 @@ class Rotate a where
 -- We invert the rotate because it is the co-varient position
 instance Rotate a => Rotate (a -> b) where
   rotateBy t f a = f (rotateBy (-t) a)
+  
+  
+instance (Rotate a,Rotate b) => Rotate (a,b) where
+    rotateBy t (a,b) = (rotateBy t a, rotateBy t b)
+
+instance Key Turn where
+     universe = [ NoTurn, Clock, OneEighty, CounterClock ]
   

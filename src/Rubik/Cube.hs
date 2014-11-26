@@ -48,5 +48,18 @@ axisToSize :: Axis D3 -> Side
 --rotateBy :: F -> F -> F
 -}
 
+-- Which way does the faces orietate?
 
+cubeFaceDir :: Cube (Axis D3,Axis D3)
+cubeFaceDir = f where
+  f (Axis X Plus)  = (Axis Z Minus,Axis Y Plus)
+  f (Axis X Minus) = (Axis Z Plus,Axis Y Plus)
+  f (Axis Y Plus)  = (Axis X Plus,Axis Z Minus)
+  f (Axis Y Minus) = (Axis X Plus,Axis Z Plus)
+  f (Axis Z Plus)  = (Axis X Plus,Axis Y Plus)
+  f (Axis Z Minus) = (Axis X Minus,Axis Y Plus)
+
+{-
+  side -> rotate the 
+-}
 

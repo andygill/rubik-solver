@@ -17,6 +17,7 @@ instance Key D3 where
 
 -- From http://en.wikipedia.org/wiki/Right-hand_rule,
 -- Thumb ~ x, fore ~ y, other ~ z.
+-- This means that z is +ve towards you.
 
 -- From the point of the first argument, turn the second argument clockwise.
 turnD3 :: Axis D3 -> Axis D3 -> Axis D3
@@ -38,6 +39,10 @@ instance Twist r => Twist (r -> a) where
   rotateD3 d r f a = f (rotateD3 d (-r) a)
 
 instance Twist (Axis D3) where
+  rotateD3 d NoTurn       = id
   rotateD3 d Clock        = turnD3 d 
   rotateD3 d OneEighty    = turnD3 d . turnD3 d 
   rotateD3 d CounterClock = turnD3 d . turnD3 d . turnD3 d 
+
+instance (Twist a, Twist b) => Twist (a,b) where
+  rotateD3 d t (a,b) = (rotateD3 d t a, rotateD3 d t b)

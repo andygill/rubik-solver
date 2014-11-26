@@ -8,7 +8,10 @@ import Rubik.Key        as K
 
 -- Perhaps call Axis, or Unit.
 data Axis dim = Axis dim Sign
-    deriving (Eq,Ord,Ix, Show)
+    deriving (Eq,Ord,Ix)
+    
+instance Show dim => Show (Axis dim) where
+    show (Axis dim sgn) = show dim ++ show sgn
 
 instance Reverse (Axis dim) where
     reverse (Axis dim dir) = Axis dim (R.reverse dir)
