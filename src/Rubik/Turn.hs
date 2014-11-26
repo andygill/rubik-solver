@@ -25,7 +25,14 @@ turnToInteger OneEighty    = 2
 turnToInteger CounterClock = 3
 
 class Rotate a where
+  -- can complete either
+  turn :: a -> a
+  turn = rotateBy Clock
+
   rotateBy :: Turn -> a -> a
+  rotateBy Clock        = turn
+  rotateBy OneEighty    = turn . turn
+  rotateBy CounterClock = turn . turn . turn
 
 -- We invert the rotate because it is the co-varient position
 instance Rotate a => Rotate (a -> b) where

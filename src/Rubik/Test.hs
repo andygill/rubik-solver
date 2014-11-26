@@ -14,6 +14,8 @@ import Rubik.Color
 import Rubik.Axis
 import Rubik.Sign
 import Rubik.Key
+import Rubik.V2
+import Rubik.Abs
 
 clk :: Face Square
 clk = id
@@ -52,13 +54,13 @@ main = shape $ packShapes
 
 -- notations
 z :: Cube (Face a) -> Cube (Face a)
-z c0 = (\ (f,o) m -> f {-rotateBy (toTurn o m) f-}) <$> c2 <*> w
+z c0 = (\ (f,o) m -> {-rotateBy (toTurn o m)-} f) <$> c2 <*> w
   where
         c1 = (,) <$> c0 <*> cubeFaceDir
         f a b _ = a
         c2 = rotateD3 o t c1
         t =  Clock
-        o = Axis Y Plus
+        o = Axis X Plus
         w = fmap (rotateD3 o t) cubeFaceDir
 
 t r o = fmap (rotateD3 o r) (cubeFaceDir)
@@ -96,4 +98,13 @@ toTurn' (Plus,Plus)   = NoTurn
 toTurn' (Plus,Minus)  = Clock
 toTurn' (Minus,Minus) = OneEighty
 toTurn' (Minus,Plus)  = CounterClock
+
+-------------------
+
+
+-- A cube is a function from side and 2D tile coord to value
+
+type Face' a = V2 Abs -> a
+
+type Cube' a = Axis D3 -> Face' a
 
