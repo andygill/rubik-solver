@@ -9,6 +9,8 @@ import Control.Applicative
 import Rubik.Key        as K
 import Rubik.Turn       as T
 import Rubik.Reverse    as R
+import Rubik.V2       
+import Rubik.Abs
 
 data File = Left | Center | Right
     deriving (Eq,Ord,Enum,Show,Ix)
@@ -58,7 +60,15 @@ facePlacement (Square a b) = (file b,rank a)
         file Left   = 0
         file Center = 1
         file Right  = 2
-        
+
+type Face' a = V2 Abs -> a
+
+facePlacement' :: Face' (Int,Int)
+facePlacement' (V2 a b) = (f a, f b)
+  where
+        f MinusOne = 0
+        f Zero     = 1
+        f PlusOne  = 2
 
 type Permutation a = a -> a
 

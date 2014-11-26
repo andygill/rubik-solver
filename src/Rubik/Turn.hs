@@ -45,3 +45,11 @@ instance (Rotate a,Rotate b) => Rotate (a,b) where
 instance Key Turn where
      universe = [ NoTurn, Clock, OneEighty, CounterClock ]
   
+data Apply a b = Apply (a -> b) a
+
+apply :: Apply a b -> b
+apply (Apply f a) = f a
+ 
+instance Rotate a => Rotate (Apply a b) where
+  turn (Apply f a) = Apply f (turn a)
+

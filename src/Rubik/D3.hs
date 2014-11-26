@@ -22,12 +22,17 @@ instance Key D3 where
 turnD3 :: Axis D3 -> Axis D3 -> Axis D3
 turnD3 (Axis a1 d1) (Axis a2 d2) 
         | a1 == a2           = Axis a2 d2
-        | a1 == X && a2 == Y = Axis Z $ d
+        | otherwise          = cross (Axis a1 d1) (Axis a2 d2) 
+
+cross :: Axis D3 -> Axis D3 -> Axis D3
+cross (Axis a1 d1) (Axis a2 d2) 
+        | a1 == a2 = error "cross product of perpendicular vectors is not defined"
+        | a1 == X && a2 == Y = Axis Z $ d               -- definition
         | a1 == X && a2 == Z = Axis Y $ R.reverse d 
-        | a1 == Y && a2 == X = Axis Z $ R.reverse d
+        | a1 == Y && a2 == X = Axis Z $ R.reverse d     -- by defintion + anti-commutative
         | a1 == Y && a2 == Z = Axis X $ d
         | a1 == Z && a2 == X = Axis Y $ d
-        | a1 == Z && a2 == Y = Axis X $ R.reverse d
+        | a1 == Z && a2 == Y = Axis X $ R.reverse d        
   where d = d1 `mulSign` d2
 
 

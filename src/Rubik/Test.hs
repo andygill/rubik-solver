@@ -28,6 +28,12 @@ drawFace face = background "#202020" 0.01 0.1
                        $ drawMap facePlacement $ 
                            fmap (borderShape 0.05) $ face
 
+drawFace' :: Face' Shape -> Shape
+drawFace' face = background "#202020" 0.01 0.1
+                       $ drawMap facePlacement' $ 
+                           fmap (borderShape 0.05) $ face
+
+
 drawCube :: Cube Shape -> Shape
 drawCube = borderShape 0.1
          . drawMap cubePlacement
@@ -36,11 +42,20 @@ drawCube = borderShape 0.1
 face :: Text -> Face Shape
 face col k = tile col `overlay` (text 10 $ show k)
 
+face' :: Text -> Face' Shape
+face' col k = tile col `overlay` (text 5 $ show k)
+
 cube :: Cube (Face Shape)
 cube = fmap face
      $ fmap pack
      $ fmap showColor
      $  start
+
+cube' :: Puzzle Shape
+cube' = fmap face'
+     $ fmap pack
+     $ fmap showColor
+     $ start
 
 --main = shape (drawFace $ face)
 --main = shape (drawFace $ rotateBy Clock $ face "red")
@@ -48,8 +63,8 @@ cube = fmap face
 --main = shape (drawCube $ fmap drawFace cube)
 
 main = shape $ packShapes 
-             [ [ drawCube $ fmap drawFace $ cube ]
-             , [ drawCube $ fmap drawFace $ z cube ]
+             [ [ drawCube $ fmap drawFace' $ cube' ]
+             , [ drawCube $ fmap drawFace' $ rotateCube (Axis Z Plus) $ cube' ]
              ]
 
 -- notations
@@ -102,9 +117,20 @@ toTurn' (Minus,Plus)  = CounterClock
 -------------------
 
 
--- A cube is a function from side and 2D tile coord to value
+-- A puzzle is cube, a function from side and 2D tile coord to value
 
-type Face' a = V2 Abs -> a
+type Puzzle a = Cube (Face' a)
 
-type Cube' a = Axis D3 -> Face' a
+--project :: Cube' a -> (Factor (...) (V2 ) -> a)
+--project 
 
+--   (Axis D3 -> V2 Abs -> a) -> (Factor (...) (V2 Abs)
+
+rotateCube :: Axis D3 -> Puzzle a -> Puzzle a
+rotateCube ax1@(Axis a1 d1) f ax2@(Axis a2 d2) v@(V2 v1 v2)
+        | a1 == a2 && d1 == d2 = f ax2 (rotateBy Clock v)               -- double -ve, because we look outside in
+        | a1 == a2 && d1 /= d2 = f ax2 (rotateBy CounterClock v)
+        | otherwise = f ax v'
+  where
+          ax = cross ax1 ax2        
+          v' = v        -- 4 possibles, based on rotation of v

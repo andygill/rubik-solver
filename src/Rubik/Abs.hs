@@ -3,6 +3,7 @@ module Rubik.Abs where
 import Data.Ix
 
 import Rubik.Reverse as R
+import Rubik.Key
 
 data Abs = MinusOne | Zero | PlusOne
     deriving (Eq,Ord,Enum,Ix,Bounded)
@@ -17,3 +18,5 @@ instance R.Reverse Abs where
     reverse Zero  = Zero
     reverse PlusOne  = MinusOne
 
+instance Key Abs where
+    universe = [ MinusOne, Zero, PlusOne ]
