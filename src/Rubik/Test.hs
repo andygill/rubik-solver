@@ -16,6 +16,7 @@ import Rubik.Sign
 import Rubik.Key
 import Rubik.V2
 import Rubik.Abs
+import Rubik.Reverse as R
 
 clk :: Face Square
 clk = id
@@ -28,11 +29,10 @@ drawFace face = background "#202020" 0.01 0.1
                        $ drawMap facePlacement $ 
                            fmap (borderShape 0.05) $ face
 
-drawFace' :: Face' Shape -> Shape
-drawFace' face = background "#202020" 0.01 0.1
-                       $ drawMap facePlacement' $ 
+drawFace' :: Cube (Face' Shape -> Shape)
+drawFace' sd face = background "#202020" 0.01 0.1
+                       $ drawMap (facePlacement'' sd) $ 
                            fmap (borderShape 0.05) $ face
-
 
 drawCube :: Cube Shape -> Shape
 drawCube = borderShape 0.1
@@ -63,8 +63,8 @@ cube' = fmap face'
 --main = shape (drawCube $ fmap drawFace cube)
 
 main = shape $ packShapes 
-             [ [ drawCube $ fmap drawFace' $ cube' ]
-             , [ drawCube $ fmap drawFace' $ rotateCube (Axis Z Plus) $ cube' ]
+             [ [ drawCube $ drawFace' <*> cube' ]
+             , [ drawCube $ drawFace' <*> rotateCube (Axis Z Plus) cube' ]
              ]
 
 -- notations
@@ -134,3 +134,13 @@ rotateCube ax1@(Axis a1 d1) f ax2@(Axis a2 d2) v@(V2 v1 v2)
   where
           ax = cross ax1 ax2        
           v' = v        -- 4 possibles, based on rotation of v
+
+
+facePlacement'' :: Puzzle (Int,Int)
+facePlacement'' ax (V2 a b) = case ax of
+        (Axis _ _) -> (f a, f (R.reverse b))
+  where
+        f MinusOne = 0
+        f Zero     = 1
+        f PlusOne  = 2
+

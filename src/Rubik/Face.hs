@@ -64,11 +64,13 @@ facePlacement (Square a b) = (file b,rank a)
 type Face' a = V2 Abs -> a
 
 facePlacement' :: Face' (Int,Int)
-facePlacement' (V2 a b) = (f a, f b)
+facePlacement' (V2 a b) = (f a, f (R.reverse b))
   where
         f MinusOne = 0
         f Zero     = 1
         f PlusOne  = 2
+
+
 
 type Permutation a = a -> a
 
