@@ -43,7 +43,10 @@ face :: Text -> Face Shape
 face col k = tile col `overlay` (text 10 $ show k)
 
 face' :: Text -> Face' Shape
-face' col k = tile col `overlay` (text 5 $ show k)
+face' col k = tile col `overlay` (text 5 $ show k) `overlay` (if k == V2 PlusOne PlusOne 
+                                                              then triangle
+                                                              else emptyShape)
+        
 
 cube :: Cube (Face Shape)
 cube = fmap face
@@ -128,7 +131,7 @@ type Puzzle a = Cube (Face' a)
 
 rotateCube :: Axis D3 -> Puzzle a -> Puzzle a
 rotateCube ax1@(Axis a1 d1) f ax2@(Axis a2 d2) v@(V2 v1 v2)
-        | a1 == a2 && d1 == d2 = f ax2 (rotateBy Clock v)               -- double -ve, because we look outside in
+        | a1 == a2 && d1 == d2 = f ax2 (rotateBy CounterClock v)               -- double -ve, because we look outside in
         | a1 == a2 && d1 /= d2 = f ax2 (rotateBy CounterClock v)
         | otherwise = f ax v'
   where
@@ -138,7 +141,9 @@ rotateCube ax1@(Axis a1 d1) f ax2@(Axis a2 d2) v@(V2 v1 v2)
 
 facePlacement'' :: Puzzle (Int,Int)
 facePlacement'' ax (V2 a b) = case ax of
-        (Axis _ _) -> (f a, f (R.reverse b))
+        (Axis Z Plus)  -> (f a, f (R.reverse b))
+        (Axis Z Minus) -> (f (R.reverse a), f (R.reverse b))
+        (Axis _ _)     -> (f a, f (R.reverse b))
   where
         f MinusOne = 0
         f Zero     = 1

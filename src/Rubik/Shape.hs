@@ -64,6 +64,16 @@ tile col = Shape (1,1) $ do
           roundedBox (1/10) 1 1
           restore()
 
+triangle :: Shape
+triangle = Shape (1,1) $ saveRestore $ do
+        beginPath()
+        moveTo (0.5,0.3)
+        lineTo (0.3,0.7)
+        lineTo (0.7,0.7)
+        closePath()
+        fillStyle "black"
+        fill()
+        
 background :: Text -> Double -> Double -> Shape -> Shape
 background col b cor shape@(Shape (x,y) _) = Shape (x',y') $ do
         save()
