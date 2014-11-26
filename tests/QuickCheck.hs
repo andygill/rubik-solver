@@ -32,12 +32,12 @@ main = do
 -- D3
 prop_1_turnD3 :: Axis D3 -> Axis D3 -> Bool
 prop_1_turnD3 a1 a2
-         | a1 == a2  = turnD3 a1 a2 == a2
+         | a1 == a2  || a1 == R.reverse a2 = turnD3 a1 a2 == a2
          | otherwise = turnD3 a1 a2 /= a2
 
 -- turn twice reverses sign
 prop_2_turnD3 :: Axis D3 -> Axis D3 -> Property
-prop_2_turnD3 a1 a2 = a1 /= a2 ==> turnD3 a1 (turnD3 a1 a2) == R.reverse a2
+prop_2_turnD3 a1 a2 = (a1 /= a2  && a1 /= R.reverse a2) ==> turnD3 a1 (turnD3 a1 a2) == R.reverse a2
 
 -- turn four times returns to original vector
 prop_3_turnD3 :: Axis D3 -> Axis D3 -> Bool
