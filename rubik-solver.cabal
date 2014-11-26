@@ -12,7 +12,7 @@ maintainer:          andygill@ku.edu
 -- copyright:           
 category:            Game
 build-type:          Simple
-cabal-version:       >=1.8
+cabal-version:       >=1.10
 
 library
   exposed-modules:     
@@ -23,6 +23,7 @@ library
          Rubik.D2,
          Rubik.D3,
          Rubik.Drawing,
+         Rubik.Face,
          Rubik.Key,
          Rubik.Reverse,
          Rubik.Shape,
@@ -32,4 +33,19 @@ library
   build-depends:       base < 5.0, array ==0.5.*, blank-canvas==0.5.*, text,
                        containers==0.5.*
   hs-source-dirs:      src
+  default-language:    Haskell2010
 
+executable rubik-solver-qc
+  main-is: QuickCheck.hs
+  Build-Depends: 
+         base                   < 5.0,
+         QuickCheck >= 2.6,
+         rubik-solver
+  Hs-Source-Dirs: tests
+  Ghc-Options: -threaded
+  default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: git://github.com/andygill/rubik-solver.git
+  

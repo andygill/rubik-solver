@@ -5,7 +5,7 @@ import Data.Ix
 import Rubik.Reverse as R
 
 data Abs = MinusOne | Zero | PlusOne
-    deriving (Eq,Ord,Enum,Ix)
+    deriving (Eq,Ord,Enum,Ix,Bounded)
 
 instance Show Abs where
     show MinusOne = "-1"

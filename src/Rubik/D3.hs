@@ -10,14 +10,13 @@ import Rubik.Key     as K
 import Rubik.Turn    as T
 
 data D3 = X | Y | Z
-        deriving (Eq,Ord,Show,Enum,Ix)
+        deriving (Eq,Ord,Show,Enum,Ix,Bounded)
 
 instance Key D3 where
    universe = [ X, Y, Z ]
 
 -- From http://en.wikipedia.org/wiki/Right-hand_rule,
--- Thumb ~ x, fore ~ y, other ~ z.
--- This means that z is +ve towards you.
+-- Thumb ~ x, fore ~ y, other ~ z. (This means that z is +ve towards you.)
 
 -- From the point of the first argument, turn the second argument clockwise.
 turnD3 :: Axis D3 -> Axis D3 -> Axis D3
@@ -30,6 +29,7 @@ turnD3 (Axis a1 d1) (Axis a2 d2)
         | a1 == Z && a2 == X = Axis Y $ R.reverse d
         | a1 == Z && a2 == Y = Axis X $ d
   where d = d1 `mulSign` d2
+
 
 class Twist a where
   -- pick a specific direction, a which way to turn, and rotate, please.
