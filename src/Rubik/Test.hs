@@ -15,6 +15,7 @@ import Rubik.Axis
 import Rubik.Sign
 import Rubik.Key
 import Rubik.V2
+import Rubik.V3
 import Rubik.Abs
 import Rubik.Reverse as R
 
@@ -43,9 +44,10 @@ face :: Text -> Face Shape
 face col k = tile col `overlay` (text 10 $ show k)
 
 face' :: Text -> Face' Shape
-face' col k = tile col `overlay` (text 5 $ show k) `overlay` (if k == V2 PlusOne PlusOne 
-                                                              then triangle
-                                                              else emptyShape)
+face' col k = tile col `overlay` (text 5 $ show k) `overlay` (case k of
+                                                                V2 PlusOne PlusOne  -> triangle
+                                                                V2 PlusOne Zero     -> circle
+                                                                _ -> emptyShape)
         
 
 cube :: Cube (Face Shape)
@@ -131,7 +133,7 @@ type Puzzle a = Cube (Face' a)
 
 rotateCube :: Axis D3 -> Puzzle a -> Puzzle a
 rotateCube ax1@(Axis a1 d1) f ax2@(Axis a2 d2) v@(V2 v1 v2)
-        | a1 == a2 && d1 == d2 = f ax2 (rotateBy CounterClock v)               -- double -ve, because we look outside in
+        | a1 == a2 && d1 == d2 = f ax2 (rotateBy CounterClock v)    -- double -ve, because we look outside in
         | a1 == a2 && d1 /= d2 = f ax2 (rotateBy CounterClock v)
         | otherwise = f ax v'
   where
@@ -139,8 +141,13 @@ rotateCube ax1@(Axis a1 d1) f ax2@(Axis a2 d2) v@(V2 v1 v2)
           v' = v        -- 4 possibles, based on rotation of v
 
 
+-- This is about layout on screen only.
 facePlacement'' :: Puzzle (Int,Int)
 facePlacement'' ax (V2 a b) = case ax of
+        (Axis X Plus)  -> (f (R.reverse a), f (R.reverse b))
+        (Axis X Minus) -> (f a, f (R.reverse b))
+        (Axis Y Plus)  -> (f a, f b)
+        (Axis Y Minus) -> (f a, f (R.reverse b))
         (Axis Z Plus)  -> (f a, f (R.reverse b))
         (Axis Z Minus) -> (f (R.reverse a), f (R.reverse b))
         (Axis _ _)     -> (f a, f (R.reverse b))
@@ -149,3 +156,32 @@ facePlacement'' ax (V2 a b) = case ax of
         f Zero     = 1
         f PlusOne  = 2
 
+
+data Layer = E Sign      -- -2 or 2
+           | I Abs       -- -1 | 0 | 1
+           deriving (Eq, Ord, Show)
+
+instance Key Layer where
+    universe = map E universe ++ map I universe
+
+instance Reverse Layer where
+    reverse (E s) = E (R.reverse s)
+    reverse (I a) = I (R.reverse a)
+
+type Mega = V3 Layer
+
+mega :: Puzzle Mega
+mega (Axis X s) (V2 y z) = V3 (E s) (I y) (I z)
+mega (Axis Y s) (V2 x z) = V3 (I x) (E s) (I z)
+mega (Axis Z s) (V2 x y) = V3 (I x) (I y) (E s)
+
+-- rotate a Mega around a view point
+rotateLayer :: Axis D3 -> Mega -> Mega
+rotateLayer (Axis X Plus)  (V3 x y z) = V3 x z (R.reverse y)
+rotateLayer (Axis X Minus) (V3 x y z) = V3 x (R.reverse z) y
+rotateLayer (Axis Y Plus)  (V3 x y z) = V3 z y (R.reverse x)
+rotateLayer (Axis Y Minus) (V3 x y z) = V3 (R.reverse z) y x
+rotateLayer (Axis Z Plus)  (V3 x y z) = V3 y (R.reverse x) z
+rotateLayer (Axis Z Minus) (V3 x y z) = V3 (R.reverse y) x z
+
+        
