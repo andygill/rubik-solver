@@ -73,6 +73,13 @@ triangle = Shape (1,1) $ saveRestore $ do
         closePath()
         fillStyle "black"
         fill()
+
+circle :: Shape
+circle = Shape (1,1) $ saveRestore $ do
+        beginPath()
+        arc(0.5, 0.5, 0.3, 0, 2 * pi, False)
+        fillStyle "black"
+        fill()
         
 background :: Text -> Double -> Double -> Shape -> Shape
 background col b cor shape@(Shape (x,y) _) = Shape (x',y') $ do
