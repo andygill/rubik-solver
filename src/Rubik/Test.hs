@@ -175,6 +175,11 @@ mega (Axis X s) (V2 y z) = V3 (E s) (I y) (I z)
 mega (Axis Y s) (V2 x z) = V3 (I x) (E s) (I z)
 mega (Axis Z s) (V2 x y) = V3 (I x) (I y) (E s)
 
+megaAxis :: Mega -> (Axis D3,V2 Abs)
+megaAxis (V3 (E s) (I y) (I z)) = (Axis X s,V2 y z)
+megaAxis (V3 (I x) (E s) (I z)) = (Axis Y s,V2 x z)
+megaAxis (V3 (I x) (I y) (E s)) = (Axis Z s,V2 x y)
+
 -- rotate a Mega around a view point
 rotateLayer :: Axis D3 -> Mega -> Mega
 rotateLayer (Axis X Plus)  (V3 x y z) = V3 x z (R.reverse y)
@@ -184,4 +189,3 @@ rotateLayer (Axis Y Minus) (V3 x y z) = V3 (R.reverse z) y x
 rotateLayer (Axis Z Plus)  (V3 x y z) = V3 y (R.reverse x) z
 rotateLayer (Axis Z Minus) (V3 x y z) = V3 (R.reverse y) x z
 
-        
