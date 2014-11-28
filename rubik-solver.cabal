@@ -28,7 +28,9 @@ library
          Rubik.Reverse,
          Rubik.Shape,
          Rubik.Sign,
-         Rubik.Turn
+         Rubik.Turn,
+         Rubik.V2,
+         Rubik.V3
   -- other-modules:       
   build-depends:       base < 5.0, array ==0.5.*, blank-canvas==0.5.*, text,
                        containers==0.5.*

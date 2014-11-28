@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Rubik.Turn where
         
 import Data.Array
@@ -24,7 +25,12 @@ turnToInteger Clock        = 1
 turnToInteger OneEighty    = 2
 turnToInteger CounterClock = 3
 
+-- Split into its own module
 class Rotate a where
+  type SideOf a
+   
+  rotate :: SideOf a -> a -> a
+
   -- can complete either
   turn :: a -> a
   turn = rotateBy Clock
@@ -36,8 +42,8 @@ class Rotate a where
 
 -- We invert the rotate because it is the co-varient position
 instance Rotate a => Rotate (a -> b) where
+  type SideOf (a -> b) = SideOf a
   rotateBy t f a = f (rotateBy (-t) a)
-  
   
 instance (Rotate a,Rotate b) => Rotate (a,b) where
     rotateBy t (a,b) = (rotateBy t a, rotateBy t b)

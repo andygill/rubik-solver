@@ -1,6 +1,6 @@
 module Rubik.Key where
 
-class Ord k => Key k where
+class {- Ord k => -} Key k where
   universe :: [k]
 
 instance Key Bool where

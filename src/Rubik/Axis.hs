@@ -18,4 +18,5 @@ instance Reverse (Axis dim) where
 
 instance Key d => Key (Axis d) where
    universe = [ Axis d s | d <- universe, s <- universe ]
+
    

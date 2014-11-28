@@ -1,6 +1,7 @@
 module Main where
 
 import Test.QuickCheck
+import Control.Monad
 
 import Rubik.Reverse as R
 import Rubik.Abs
@@ -14,6 +15,7 @@ import qualified Rubik.Sign as Sign
 import Rubik.Sign (Sign)
 import qualified Rubik.Turn as Turn
 import Rubik.Turn (Turn)
+import Rubik.V2
 
 main = do
     -- Reverse
@@ -28,8 +30,8 @@ main = do
     quickCheck prop_3_turnD3
     quickCheck prop_4_turnD3
     quickCheck prop_5_turnD3
-    
-
+    -- V2
+    quickCheck prop_rotate_V2 
 
 -- D3
 prop_1_turnD3 :: Axis D3 -> Axis D3 -> Bool
@@ -71,6 +73,9 @@ instance Arbitrary D2 where
 
 instance Arbitrary D3 where
     arbitrary = elements universe
+
+instance Arbitrary a => Arbitrary (V2 a) where
+    arbitrary = liftM2 V2 arbitrary arbitrary
 
 instance Arbitrary Sign where
     arbitrary = elements universe
