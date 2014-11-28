@@ -22,6 +22,6 @@ instance Reverse a => Rotate (V2 a) where
 instance (Key a) => Key (V2 a) where
     universe = [ V2 a b | a <- universe, b <- universe ]
 
-
+-- rotate and rotate back is an identity
 prop_rotate_V2 :: Sign -> V2 Abs -> Bool
 prop_rotate_V2 sgn v2 = rotate (R.reverse sgn) (rotate sgn v2) == v2
