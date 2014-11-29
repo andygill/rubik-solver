@@ -95,7 +95,7 @@ cube' = Puzzle
 
 main = shape $ packShapes 
              [ [ drawCube $ cube ]
-             , [ drawCube $ rotate (Turn3D NoTurn Z) $ cube ]
+             , [ drawCube $ rotate (Turn3D t Z) $ cube | t <- universe ]
              ]
 
 {-

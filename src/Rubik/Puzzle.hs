@@ -47,7 +47,8 @@ puzzleSquare = Puzzle (\ _ sq -> sq)
 
 
 instance Rotate Turn3D (Puzzle a) where
-  rotate twist t = t
+  rotate twist (Puzzle p) = Puzzle $ \ sd sq -> case megaAxis (rotate (N.negate twist) (mega sd sq)) of
+                                                  (sd',sq') -> p sd' sq'
 
 data Layer = E Sign      -- -2 or 2
            | I Abs       -- -1 | 0 | 1

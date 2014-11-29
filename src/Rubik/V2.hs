@@ -21,8 +21,8 @@ instance Negate a => Rotate Sign (V2 a) where
 instance Negate a => Rotate Turn (V2 a) where
   rotate NoTurn       (V2 x y) = V2 x y
   rotate Clock        (V2 x y) = V2 y (N.negate x)
-  rotate CounterClock (V2 x y) = V2 (N.negate x) (N.negate y)
-  rotate OneEighty    (V2 x y) = V2 (N.negate y) x
+  rotate CounterClock (V2 x y) = V2 (N.negate y) x
+  rotate OneEighty    (V2 x y) = V2 (N.negate x) (N.negate y)
 
 instance (Key a) => Key (V2 a) where
     universe = [ V2 a b | a <- universe, b <- universe ]
