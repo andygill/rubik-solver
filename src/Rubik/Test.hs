@@ -19,18 +19,7 @@ import Rubik.V3
 import Rubik.Abs
 import Rubik.Negate as N
 
-clk :: Face Square
-clk = id
-
-main :: IO ()
---main = shape (tile "red" `overlay` text 5 "Hello")
-
-drawFace :: Face Shape -> Shape
-drawFace face = background "#202020" 0.01 0.1
-                       $ drawMap facePlacement $ 
-                           fmap (borderShape 0.05) $ face
-
-drawFace' :: Cube (Face' Shape -> Shape)
+drawFace' :: Cube (Face Shape -> Shape)
 drawFace' sd face = background "#202020" 0.01 0.1
                        $ drawMap (facePlacement'' sd) $ 
                            fmap (borderShape 0.05) $ face
@@ -40,22 +29,13 @@ drawCube = borderShape 0.1
          . drawMap cubePlacement
          . fmap (borderShape 0.01)
 
-face :: Text -> Face Shape
-face col k = tile col `overlay` (text 10 $ show k)
 
-face' :: Text -> Face' Shape
+face' :: Text -> Face Shape
 face' col k = tile col `overlay` (text 5 $ show k) `overlay` (case k of
                                                                 V2 PlusOne PlusOne  -> triangle
                                                                 V2 PlusOne Zero     -> circle
                                                                 _ -> emptyShape)
         
-
-cube :: Cube (Face Shape)
-cube = fmap face
-     $ fmap pack
-     $ fmap showColor
-     $  start
-
 cube' :: Puzzle Shape
 cube' = fmap face'
      $ fmap pack
@@ -125,7 +105,7 @@ toTurn' (Minus,Plus)  = CounterClock
 
 -- A puzzle is cube, a function from side and 2D tile coord to value
 
-type Puzzle a = Cube (Face' a)
+type Puzzle a = Cube (Face a)
 
 --project :: Cube' a -> (Factor (...) (V2 ) -> a)
 --project 

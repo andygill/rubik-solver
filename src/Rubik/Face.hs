@@ -12,6 +12,7 @@ import Rubik.Negate     as N
 import Rubik.V2       
 import Rubik.Abs
 
+{-
 data File = Left | Center | Right
     deriving (Eq,Ord,Enum,Show,Ix)
 
@@ -49,6 +50,7 @@ corners = (Square Top Left,Square Bottom Right)
 squares :: [[Square]]
 squares = [ [ Square a b | b <- [Left .. Right] ] |  a <- [Top .. Bottom]]
 
+
 type Face a = Square -> a
 
 facePlacement :: Face (Int,Int)
@@ -60,46 +62,15 @@ facePlacement (Square a b) = (file b,rank a)
         file Left   = 0
         file Center = 1
         file Right  = 2
+-}
 
-type Face' a = V2 Abs -> a
+type Face a = V2 Abs -> a
 
-facePlacement' :: Face' (Int,Int)
-facePlacement' (V2 a b) = (f a, f (N.negate b))
+facePlacement :: Face (Int,Int)
+facePlacement (V2 a b) = (f a, f (N.negate b))
   where
         f MinusOne = 0
         f Zero     = 1
         f PlusOne  = 2
 
-
-
-type Permutation a = a -> a
-
-clockwise :: Permutation Square
-clockwise (Square r f) = Square (case f of
-                                   Left   -> Top
-                                   Center -> Middle
-                                   Right  -> Bottom)
-                                (case r of
-                                   Top    -> Right
-                                   Middle -> Center
-                                   Bottom -> Left)
-
-
-{-
-                                   
-rotateBy :: Turn -> Face a -> Face a
-rotateBy NoTurn       f = f
-rotateBy Clock        f = f . clockwise . clockwise . clockwise
---rotateBy OneEighty    = clockwise . clockwise
---rotateBy CounterClock = 
-
--}
-
-{-
-                                   instance Rotate Square where
-  rotateBy NoTurn       = id
-  rotateBy Clock        = clockwise
-  rotateBy OneEighty    = clockwise . clockwise
-  rotateBy CounterClock = clockwise . clockwise . clockwise
-          -}
                            
