@@ -2,7 +2,7 @@ module Rubik.Abs where
 
 import Data.Ix
 
-import Rubik.Reverse as R
+import Rubik.Negate as N
 import Rubik.Key
 
 data Abs = MinusOne | Zero | PlusOne
@@ -13,10 +13,10 @@ instance Show Abs where
     show Zero     = "0"
     show PlusOne  = "+1"
 
-instance R.Reverse Abs where
-    reverse MinusOne = PlusOne
-    reverse Zero  = Zero
-    reverse PlusOne  = MinusOne
+instance N.Negate Abs where
+    negate MinusOne = PlusOne
+    negate Zero  = Zero
+    negate PlusOne  = MinusOne
 
 instance Key Abs where
     universe = [ MinusOne, Zero, PlusOne ]

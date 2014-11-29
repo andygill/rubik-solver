@@ -8,17 +8,17 @@ import Control.Applicative
 
 import Rubik.Key        as K
 import Rubik.Turn       as T
-import Rubik.Reverse    as R
+import Rubik.Negate     as N
 import Rubik.V2       
 import Rubik.Abs
 
 data File = Left | Center | Right
     deriving (Eq,Ord,Enum,Show,Ix)
 
-instance Reverse File where
-    reverse Left   = Right
-    reverse Center = Center
-    reverse Right  = Right
+instance Negate File where
+    negate Left   = Right
+    negate Center = Center
+    negate Right  = Right
 
 instance Key File where
     universe = [Left, Center, Right]
@@ -26,10 +26,10 @@ instance Key File where
 data Rank = Top | Middle | Bottom
     deriving (Eq,Ord,Enum,Show,Ix)
 
-instance Reverse Rank where
-    reverse Top    = Bottom
-    reverse Middle = Middle
-    reverse Bottom = Top
+instance Negate Rank where
+    negate Top    = Bottom
+    negate Middle = Middle
+    negate Bottom = Top
     
 instance Key Rank where
     universe = [Top, Middle, Bottom]
@@ -64,7 +64,7 @@ facePlacement (Square a b) = (file b,rank a)
 type Face' a = V2 Abs -> a
 
 facePlacement' :: Face' (Int,Int)
-facePlacement' (V2 a b) = (f a, f (R.reverse b))
+facePlacement' (V2 a b) = (f a, f (N.negate b))
   where
         f MinusOne = 0
         f Zero     = 1

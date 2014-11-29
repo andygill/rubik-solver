@@ -1,8 +1,8 @@
 module Rubik.Axis where
 
 import Data.Ix
-
-import Rubik.Reverse    as R
+ 
+import Rubik.Negate     as N
 import Rubik.Sign       as S
 import Rubik.Key        as K
 
@@ -13,8 +13,8 @@ data Axis dim = Axis dim Sign
 instance Show dim => Show (Axis dim) where
     show (Axis dim sgn) = show dim ++ show sgn
 
-instance Reverse (Axis dim) where
-    reverse (Axis dim dir) = Axis dim (R.reverse dir)
+instance Negate (Axis dim) where
+    negate (Axis dim dir) = Axis dim (N.negate dir)
 
 instance Key d => Key (Axis d) where
    universe = [ Axis d s | d <- universe, s <- universe ]

@@ -2,7 +2,7 @@ module Rubik.D2 where
 
 import Data.Ix
 
-import Rubik.Reverse as R
+import Rubik.Negate as N
 import Rubik.Axis  as V
 import Rubik.Turn    as T
 import Rubik.Key as K
@@ -16,7 +16,7 @@ instance Key D2 where
 
 -- (clockwise) turn
 turnD2 :: Axis D2 -> Axis D2
-turnD2 (Axis X dir) = Axis Y (R.reverse dir)
+turnD2 (Axis X dir) = Axis Y (N.negate dir)
 turnD2 (Axis Y dir) = Axis X dir
 
 -- 4 turns gets back to original value

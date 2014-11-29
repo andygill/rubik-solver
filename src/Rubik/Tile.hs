@@ -2,7 +2,7 @@ module Rubik.Tile where
         
 import Rubik.Abs as A
 import Rubik.Axis
-import Rubik.Reverse as R
+import Rubik.Negate as N
 import Rubik.Sign as S
 import Rubik.Turn as T
 import Rubik.V3
@@ -18,9 +18,9 @@ data Layer = E Sign      -- -2 or 2
 instance Key Layer where
     universe = map E universe ++ map I universe
 
-instance Reverse Layer where
-    reverse (E s) = E (R.reverse s)
-    reverse (I a) = I (R.reverse a)
+instance Negate Layer where
+    negate (E s) = E (N.negate s)
+    negate (I a) = I (N.negate a)
 
 data Tile = Tile (Axis D3) (V2 Abs)
 

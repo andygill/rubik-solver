@@ -17,7 +17,7 @@ import Rubik.Key
 import Rubik.V2
 import Rubik.V3
 import Rubik.Abs
-import Rubik.Reverse as R
+import Rubik.Negate as N
 
 clk :: Face Square
 clk = id
@@ -144,13 +144,13 @@ rotateCube ax1@(Axis a1 d1) f ax2@(Axis a2 d2) v@(V2 v1 v2)
 -- This is about layout on screen only.
 facePlacement'' :: Puzzle (Int,Int)
 facePlacement'' ax (V2 a b) = case ax of
-        (Axis X Plus)  -> (f (R.reverse a), f (R.reverse b))
-        (Axis X Minus) -> (f a, f (R.reverse b))
+        (Axis X Plus)  -> (f (N.negate a), f (N.negate b))
+        (Axis X Minus) -> (f a, f (N.negate b))
         (Axis Y Plus)  -> (f a, f b)
-        (Axis Y Minus) -> (f a, f (R.reverse b))
-        (Axis Z Plus)  -> (f a, f (R.reverse b))
-        (Axis Z Minus) -> (f (R.reverse a), f (R.reverse b))
-        (Axis _ _)     -> (f a, f (R.reverse b))
+        (Axis Y Minus) -> (f a, f (N.negate b))
+        (Axis Z Plus)  -> (f a, f (N.negate b))
+        (Axis Z Minus) -> (f (N.negate a), f (N.negate b))
+        (Axis _ _)     -> (f a, f (N.negate b))
   where
         f MinusOne = 0
         f Zero     = 1
@@ -164,9 +164,9 @@ data Layer = E Sign      -- -2 or 2
 instance Key Layer where
     universe = map E universe ++ map I universe
 
-instance Reverse Layer where
-    reverse (E s) = E (R.reverse s)
-    reverse (I a) = I (R.reverse a)
+instance Negate Layer where
+    negate (E s) = E (N.negate s)
+    negate (I a) = I (N.negate a)
 
 type Mega = V3 Layer
 
@@ -182,10 +182,10 @@ megaAxis (V3 (I x) (I y) (E s)) = (Axis Z s,V2 x y)
 
 -- rotate a Mega around a view point
 rotateLayer :: Axis D3 -> Mega -> Mega
-rotateLayer (Axis X Plus)  (V3 x y z) = V3 x z (R.reverse y)
-rotateLayer (Axis X Minus) (V3 x y z) = V3 x (R.reverse z) y
-rotateLayer (Axis Y Plus)  (V3 x y z) = V3 z y (R.reverse x)
-rotateLayer (Axis Y Minus) (V3 x y z) = V3 (R.reverse z) y x
-rotateLayer (Axis Z Plus)  (V3 x y z) = V3 y (R.reverse x) z
-rotateLayer (Axis Z Minus) (V3 x y z) = V3 (R.reverse y) x z
+rotateLayer (Axis X Plus)  (V3 x y z) = V3 x z (N.negate y)
+rotateLayer (Axis X Minus) (V3 x y z) = V3 x (N.negate z) y
+rotateLayer (Axis Y Plus)  (V3 x y z) = V3 z y (N.negate x)
+rotateLayer (Axis Y Minus) (V3 x y z) = V3 (N.negate z) y x
+rotateLayer (Axis Z Plus)  (V3 x y z) = V3 y (N.negate x) z
+rotateLayer (Axis Z Minus) (V3 x y z) = V3 (N.negate y) x z
 

@@ -2,7 +2,7 @@ module Rubik.Sign where
 
 import Data.Ix
 
-import Rubik.Reverse as R
+import Rubik.Negate as N
 import Rubik.Key
 
 data Sign = Minus | Plus
@@ -12,9 +12,9 @@ instance Show Sign where
     show Minus = "-"
     show Plus  = "+"
 
-instance R.Reverse Sign where
-    reverse Minus = Plus
-    reverse Plus  = Minus
+instance N.Negate Sign where
+    negate Minus = Plus
+    negate Plus  = Minus
 
 mulSign :: Sign -> Sign -> Sign
 mulSign x y | x == y    = Plus

@@ -3,7 +3,7 @@ module Rubik.D3 where
 
 import Data.Ix
 
-import Rubik.Reverse as R
+import Rubik.Negate as N
 import Rubik.Axis  as V
 import Rubik.Sign    as S
 import Rubik.Key     as K
@@ -28,11 +28,11 @@ cross :: Axis D3 -> Axis D3 -> Axis D3
 cross (Axis a1 d1) (Axis a2 d2) 
         | a1 == a2 = error "cross product of perpendicular vectors is not defined"
         | a1 == X && a2 == Y = Axis Z $ d               -- definition
-        | a1 == X && a2 == Z = Axis Y $ R.reverse d 
-        | a1 == Y && a2 == X = Axis Z $ R.reverse d     -- by defintion + anti-commutative
+        | a1 == X && a2 == Z = Axis Y $ N.negate d 
+        | a1 == Y && a2 == X = Axis Z $ N.negate d     -- by defintion + anti-commutative
         | a1 == Y && a2 == Z = Axis X $ d
         | a1 == Z && a2 == X = Axis Y $ d
-        | a1 == Z && a2 == Y = Axis X $ R.reverse d        
+        | a1 == Z && a2 == Y = Axis X $ N.negate d        
   where d = d1 `mulSign` d2
 
 

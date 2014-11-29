@@ -3,7 +3,7 @@ module Main where
 import Test.QuickCheck
 import Control.Monad
 
-import Rubik.Reverse as R
+import Rubik.Negate as N
 import Rubik.Abs
 import Rubik.Axis
 import qualified Rubik.D2 as D2
@@ -36,27 +36,27 @@ main = do
 -- D3
 prop_1_turnD3 :: Axis D3 -> Axis D3 -> Bool
 prop_1_turnD3 a1 a2
-         | a1 == a2  || a1 == R.reverse a2 = turnD3 a1 a2 == a2
+         | a1 == a2  || a1 == N.negate a2 = turnD3 a1 a2 == a2
          | otherwise = turnD3 a1 a2 /= a2
 
 -- turn twice reverses sign
 prop_2_turnD3 :: Axis D3 -> Axis D3 -> Property
-prop_2_turnD3 a1 a2 = (a1 /= a2  && a1 /= R.reverse a2) ==> turnD3 a1 (turnD3 a1 a2) == R.reverse a2
+prop_2_turnD3 a1 a2 = (a1 /= a2  && a1 /= N.negate a2) ==> turnD3 a1 (turnD3 a1 a2) == N.negate a2
 
 -- turn four times returns to original vector
 prop_3_turnD3 :: Axis D3 -> Axis D3 -> Bool
 prop_3_turnD3 a1 a2 = turnD3 a1 (turnD3 a1 (turnD3 a1 (turnD3 a1 a2))) == a2
 
 prop_4_turnD3 :: Axis D3 -> Axis D3 -> Property
-prop_4_turnD3 a1 a2 = (a1 /= a2  && a1 /= R.reverse a2) 
-        ==> turnD3 a1 (turnD3 a1 a2) == R.reverse (turnD3 (R.reverse a1) (turnD3 a1 a2))
+prop_4_turnD3 a1 a2 = (a1 /= a2  && a1 /= N.negate a2) 
+        ==> turnD3 a1 (turnD3 a1 a2) == N.negate (turnD3 (N.negate a1) (turnD3 a1 a2))
 
 prop_5_turnD3 :: Axis D3 -> Axis D3 -> Axis D3 -> Property
 prop_5_turnD3 a1 a2 a3 = (diff_axis a1 a3 && diff_axis a2 a3 && diff_axis a1 a2)
         ==> turnD3 a1 (turnD3 a2 a3) /= turnD3 a2 (turnD3 a1 a3)
 
 diff_axis :: Axis D3 -> Axis D3 -> Bool
-diff_axis a1 a2 = a1 /= a2  && a1 /= R.reverse a2
+diff_axis a1 a2 = a1 /= a2  && a1 /= N.negate a2
 
 -- The instances
 instance Arbitrary Abs where

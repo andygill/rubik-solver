@@ -25,7 +25,7 @@ library
          Rubik.Drawing,
          Rubik.Face,
          Rubik.Key,
-         Rubik.Reverse,
+         Rubik.Negate,
          Rubik.Shape,
          Rubik.Sign,
          Rubik.Turn,
