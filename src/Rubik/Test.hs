@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables, OverloadedStrings #-}
 module Rubik.Test where
         
 import Control.Applicative
@@ -18,7 +18,43 @@ import Rubik.V2
 import Rubik.V3
 import Rubik.Abs
 import Rubik.Negate as N
+import Rubik.Puzzle
 
+
+drawCube :: Puzzle Shape -> Shape
+drawCube = borderShape 0.1
+         . drawMap cubePlacement
+         . fmap (borderShape 0.01)
+         . drawFace
+
+
+-- fold a puzzle into a cube of shapes
+drawFace :: Puzzle Shape -> Cube Shape
+drawFace (Puzzle pz) sd 
+                = background "#202020" 0.01 0.1
+                $ drawMap (facePlacement sd)
+                $ fmap (borderShape 0.05)
+                $ pz sd
+
+facePlacement :: Cube (Face (Int, Int))
+facePlacement ax sq@(V2 x0 y0) = case ax of
+{-
+        (Axis X Plus)  -> (f (N.negate a), f (N.negate b))
+        (Axis X Minus) -> (f a, f (N.negate b))
+        (Axis Y Plus)  -> (f a, f b)
+        (Axis Y Minus) -> (f a, f (N.negate b))
+        (Axis Z Plus)  -> (f a, f (N.negate b))
+        (Axis Z Minus) -> (f (N.negate a), f (N.negate b))
+-}
+        (Axis _ _)     -> (x,y)
+  where
+        x = loc x0
+        y = loc y0
+        loc MinusOne = 0
+        loc Zero     = 1
+        loc PlusOne  = 2
+
+{-
 drawFace' :: Cube (Face Shape -> Shape)
 drawFace' sd face = background "#202020" 0.01 0.1
                        $ drawMap (facePlacement'' sd) $ 
@@ -29,18 +65,17 @@ drawCube = borderShape 0.1
          . drawMap cubePlacement
          . fmap (borderShape 0.01)
 
-
+-}
 face' :: Text -> Face Shape
 face' col k = tile col `overlay` (text 5 $ show k) `overlay` (case k of
                                                                 V2 PlusOne PlusOne  -> triangle
                                                                 V2 PlusOne Zero     -> circle
                                                                 _ -> emptyShape)
-        
 cube' :: Puzzle Shape
-cube' = fmap face'
-     $ fmap pack
-     $ fmap showColor
-     $ start
+cube' = Puzzle
+      $ fmap face'
+      $ fmap (pack . showColor)
+      $ start
 
 --main = shape (drawFace $ face)
 --main = shape (drawFace $ rotateBy Clock $ face "red")
@@ -48,8 +83,8 @@ cube' = fmap face'
 --main = shape (drawCube $ fmap drawFace cube)
 
 main = shape $ packShapes 
-             [ [ drawCube $ drawFace' <*> cube' ]
-             , [ drawCube $ drawFace' <*> rotateCube (Axis Z Plus) cube' ]
+             [ [ drawCube cube' ]
+--             , [ drawCube $ drawFace' <*> rotateCube (Axis Z Plus) cube' ]
              ]
 
 {-
@@ -101,11 +136,9 @@ toTurn' (Minus,Minus) = OneEighty
 toTurn' (Minus,Plus)  = CounterClock
 -}
 -------------------
-
+{-
 
 -- A puzzle is cube, a function from side and 2D tile coord to value
-
-type Puzzle a = Cube (Face a)
 
 --project :: Cube' a -> (Factor (...) (V2 ) -> a)
 --project 
@@ -172,3 +205,4 @@ rotateLayer (Axis Y Minus) (V3 x y z) = V3 (N.negate z) y x
 rotateLayer (Axis Z Plus)  (V3 x y z) = V3 y (N.negate x) z
 rotateLayer (Axis Z Minus) (V3 x y z) = V3 (N.negate y) x z
 
+-}
