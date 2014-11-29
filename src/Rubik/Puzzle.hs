@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, MultiParamTypeClasses #-}
 module Rubik.Puzzle where
         
 import Control.Applicative
@@ -45,3 +45,29 @@ puzzleSide = Puzzle (\ s _ -> s)
 puzzleSquare :: Puzzle (V2 Abs)         -- Puzzle location
 puzzleSquare = Puzzle (\ _ sq -> sq)
 
+
+instance Rotate Turn3D (Puzzle a) where
+  rotate twist t = t
+
+data Layer = E Sign      -- -2 or 2
+           | I Abs       -- -1 | 0 | 1
+           deriving (Eq, Ord, Show)
+
+instance Key Layer where
+    universe = map E universe ++ map I universe
+
+instance Negate Layer where
+    negate (E s) = E (N.negate s)
+    negate (I a) = I (N.negate a)
+
+type Mega = V3 Layer
+
+mega :: Axis D3 -> V2 Abs -> Mega
+mega (Axis X s) (V2 y z) = V3 (E s) (I y) (I z)
+mega (Axis Y s) (V2 x z) = V3 (I x) (E s) (I z)
+mega (Axis Z s) (V2 x y) = V3 (I x) (I y) (E s)
+
+megaAxis :: Mega -> (Axis D3,V2 Abs)
+megaAxis (V3 (E s) (I y) (I z)) = (Axis X s,V2 y z)
+megaAxis (V3 (I x) (E s) (I z)) = (Axis Y s,V2 x z)
+megaAxis (V3 (I x) (I y) (E s)) = (Axis Z s,V2 x y)

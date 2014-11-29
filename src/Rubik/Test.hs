@@ -75,7 +75,7 @@ cube :: Puzzle Shape
 cube = f <$> rubik <*> puzzleSide <*> puzzleSquare
   where f col sd sq = tile (pack $ showColor $ col) 
                 `overlay`
-                       text 5 (s (mega sd sq))
+                       text 7 (s (mega sd sq))
         s (V3 a b c) = show a ++ "\n" ++ show b ++ "\n" ++ show c
 
 rubik :: Puzzle Color
@@ -94,8 +94,8 @@ cube' = Puzzle
 --main = shape (drawCube $ fmap drawFace cube)
 
 main = shape $ packShapes 
-             [ [ drawCube cube ]
---             , [ drawCube $ drawFace' <*> rotateCube (Axis Z Plus) cube' ]
+             [ [ drawCube $ cube ]
+             , [ drawCube $ rotate (Turn3D NoTurn Z) $ cube ]
              ]
 
 {-
@@ -184,28 +184,6 @@ facePlacement'' ax (V2 a b) = case ax of
         f PlusOne  = 2
 
 -}
-data Layer = E Sign      -- -2 or 2
-           | I Abs       -- -1 | 0 | 1
-           deriving (Eq, Ord, Show)
-
-instance Key Layer where
-    universe = map E universe ++ map I universe
-
-instance Negate Layer where
-    negate (E s) = E (N.negate s)
-    negate (I a) = I (N.negate a)
-
-type Mega = V3 Layer
-
-mega :: Axis D3 -> V2 Abs -> Mega
-mega (Axis X s) (V2 y z) = V3 (E s) (I y) (I z)
-mega (Axis Y s) (V2 x z) = V3 (I x) (E s) (I z)
-mega (Axis Z s) (V2 x y) = V3 (I x) (I y) (E s)
-
-megaAxis :: Mega -> (Axis D3,V2 Abs)
-megaAxis (V3 (E s) (I y) (I z)) = (Axis X s,V2 y z)
-megaAxis (V3 (I x) (E s) (I z)) = (Axis Y s,V2 x z)
-megaAxis (V3 (I x) (I y) (E s)) = (Axis Z s,V2 x y)
 {-
 -- rotate a Mega around a view point
 rotateLayer :: Axis D3 -> Mega -> Mega
