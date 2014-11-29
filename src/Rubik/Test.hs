@@ -72,7 +72,8 @@ main = shape $ packShapes
              , [ drawCube $ drawFace' <*> rotateCube (Axis Z Plus) cube' ]
              ]
 
--- notations
+{-
+             -- notations
 z :: Cube (Face a) -> Cube (Face a)
 z c0 = (\ (f,o) m -> {-rotateBy (toTurn o m)-} f) <$> c2 <*> w
   where
@@ -118,7 +119,7 @@ toTurn' (Plus,Plus)   = NoTurn
 toTurn' (Plus,Minus)  = Clock
 toTurn' (Minus,Minus) = OneEighty
 toTurn' (Minus,Plus)  = CounterClock
-
+-}
 -------------------
 
 
@@ -132,13 +133,15 @@ type Puzzle a = Cube (Face' a)
 --   (Axis D3 -> V2 Abs -> a) -> (Factor (...) (V2 Abs)
 
 rotateCube :: Axis D3 -> Puzzle a -> Puzzle a
-rotateCube ax1@(Axis a1 d1) f ax2@(Axis a2 d2) v@(V2 v1 v2)
+rotateCube ax1@(Axis a1 d1) f ax2@(Axis a2 d2) v@(V2 v1 v2) = f ax2 v
+{-
         | a1 == a2 && d1 == d2 = f ax2 (rotateBy CounterClock v)    -- double -ve, because we look outside in
         | a1 == a2 && d1 /= d2 = f ax2 (rotateBy CounterClock v)
         | otherwise = f ax v'
   where
           ax = cross ax1 ax2        
           v' = v        -- 4 possibles, based on rotation of v
+-}
 
 
 -- This is about layout on screen only.

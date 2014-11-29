@@ -1,30 +1,29 @@
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
 module Rubik.Turn where
         
 import Data.Array
+import Rubik.Negate as N
 import Rubik.Key
 
 data Turn = NoTurn | Clock | OneEighty | CounterClock
    deriving (Eq,Ord,Show,Enum,Ix)
 
-instance Num Turn where
-  x + y = fromInteger ((turnToInteger x + turnToInteger y) `mod` 4)
-  x - y = fromInteger ((turnToInteger x - turnToInteger y) `mod` 4)
-  x * y = fromInteger ((turnToInteger x * turnToInteger y) `mod` 4)
-  negate x = fromInteger (negate (turnToInteger x) `mod` 4)
-  abs x    = fromInteger (abs    (turnToInteger x) `mod` 4)
-  signum x = fromInteger (signum (turnToInteger x) `mod` 4)
-  
-  fromInteger 0 = NoTurn
-  fromInteger 1 = Clock
-  fromInteger 2 = OneEighty
-  fromInteger 3 = CounterClock
+instance Negate Turn where
+    negate NoTurn       = NoTurn
+    negate Clock        = CounterClock
+    negate OneEighty    = OneEighty
+    negate CounterClock = Clock
 
-turnToInteger NoTurn       = 0
-turnToInteger Clock        = 1
-turnToInteger OneEighty    = 2
-turnToInteger CounterClock = 3
+instance Key Turn where
+     universe = [ NoTurn, Clock, OneEighty, CounterClock ]
 
+class Rotate a b where
+  rotate :: a -> b -> b
+
+instance (Negate a, Rotate a b) => Rotate a (b -> c) where
+  rotate t f a = f (rotate (N.negate t) a)
+
+{-
 -- Split into its own module
 class Rotate a where
   type SideOf a
@@ -43,13 +42,11 @@ class Rotate a where
 -- We invert the rotate because it is the co-varient position
 instance Rotate a => Rotate (a -> b) where
   type SideOf (a -> b) = SideOf a
-  rotateBy t f a = f (rotateBy (-t) a)
+  rotateBy t f a = f (rotateBy (N.negate t) a)
   
 instance (Rotate a,Rotate b) => Rotate (a,b) where
     rotateBy t (a,b) = (rotateBy t a, rotateBy t b)
 
-instance Key Turn where
-     universe = [ NoTurn, Clock, OneEighty, CounterClock ]
   
 data Apply a b = Apply (a -> b) a
 
@@ -59,3 +56,4 @@ apply (Apply f a) = f a
 instance Rotate a => Rotate (Apply a b) where
   turn (Apply f a) = Apply f (turn a)
 
+-}

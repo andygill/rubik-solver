@@ -95,10 +95,11 @@ rotateBy Clock        f = f . clockwise . clockwise . clockwise
 
 -}
 
-instance Rotate Square where
+{-
+                                   instance Rotate Square where
   rotateBy NoTurn       = id
   rotateBy Clock        = clockwise
   rotateBy OneEighty    = clockwise . clockwise
   rotateBy CounterClock = clockwise . clockwise . clockwise
-          
+          -}
                            

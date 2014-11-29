@@ -8,3 +8,4 @@ class Negate a where
 
 prop_negate :: (Eq a, Negate a) => a -> Bool
 prop_negate a = negate (negate a) == a
+

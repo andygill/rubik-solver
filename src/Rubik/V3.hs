@@ -1,3 +1,4 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Rubik.V3 where
         
 import Rubik.Abs
@@ -12,13 +13,13 @@ import Rubik.Key as K
 data V3 a = V3 a a a
         deriving (Eq,Ord,Show)
 
-turnV3 :: Negate a => Axis D3 -> V3 a -> V3 a
-turnV3 (Axis X Plus)  (V3 x y z) = V3 x z (N.negate y)
-turnV3 (Axis X Minus) (V3 x y z) = V3 x (N.negate z) y
-turnV3 (Axis Y Plus)  (V3 x y z) = V3 z y (N.negate x)
-turnV3 (Axis Y Minus) (V3 x y z) = V3 (N.negate z) y x
-turnV3 (Axis Z Plus)  (V3 x y z) = V3 y (N.negate x) z
-turnV3 (Axis Z Minus) (V3 x y z) = V3 (N.negate y) x z
+data Twist = Twist Turn D3
+
+instance Negate a => Rotate Twist (V3 a) where
+  rotate (Twist t X) (V3 x y z) = V3 x y' z' where (V2 y' z') = rotate t $ V2 y z
+  rotate (Twist t Y) (V3 x y z) = V3 x' y z' where (V2 x' z') = rotate t $ V2 x z
+  rotate (Twist t Z) (V3 x y z) = V3 x' y' z where (V2 x' y') = rotate t $ V2 x y
 
 instance Key a => Key (V3 a) where
     universe = [ V3 a b c | a <- universe, b <- universe, c <- universe ]
+

@@ -15,8 +15,9 @@ instance Show Abs where
 
 instance N.Negate Abs where
     negate MinusOne = PlusOne
-    negate Zero  = Zero
+    negate Zero     = Zero
     negate PlusOne  = MinusOne
 
 instance Key Abs where
     universe = [ MinusOne, Zero, PlusOne ]
+
