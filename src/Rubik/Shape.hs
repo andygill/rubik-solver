@@ -133,9 +133,11 @@ overlay (Shape (x,y) c) (Shape (x',y') c') = Shape (max x x', max y y') $ do
         c'
 
 text :: Int -> String -> Shape
-text d str = Shape (1,1) $ do
+text d strs = Shape (1,1) $ do
     save()
     scale (1/20,1/20)
     font $ pack $ show d ++ "px Calibri"
-    fillText(pack str,0,fromIntegral d * 0.70)
+    sequence [ fillText(pack str,fromIntegral d * 0.1,fromIntegral d * (i + 0.70))
+             | (i,str) <- [0,1..] `zip` lines strs
+             ]
     restore()

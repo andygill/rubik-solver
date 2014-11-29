@@ -38,16 +38,15 @@ drawFace (Puzzle pz) sd
 
 facePlacement :: Cube (Face (Int, Int))
 facePlacement ax sq@(V2 x0 y0) = case ax of
-{-
-        (Axis X Plus)  -> (f (N.negate a), f (N.negate b))
-        (Axis X Minus) -> (f a, f (N.negate b))
-        (Axis Y Plus)  -> (f a, f b)
-        (Axis Y Minus) -> (f a, f (N.negate b))
-        (Axis Z Plus)  -> (f a, f (N.negate b))
-        (Axis Z Minus) -> (f (N.negate a), f (N.negate b))
--}
-        (Axis _ _)     -> (x,y)
+        (Axis X Plus)  -> (ny,nx)
+        (Axis X Minus) -> (y,nx)
+        (Axis Y Plus)  -> (x,y)
+        (Axis Y Minus) -> (x,ny)
+        (Axis Z Plus)  -> (x,ny)
+        (Axis Z Minus) -> (nx,ny)
   where
+        nx = loc $ N.negate x0
+        ny = loc $ N.negate y0
         x = loc x0
         y = loc y0
         loc MinusOne = 0
@@ -71,6 +70,18 @@ face' col k = tile col `overlay` (text 5 $ show k) `overlay` (case k of
                                                                 V2 PlusOne PlusOne  -> triangle
                                                                 V2 PlusOne Zero     -> circle
                                                                 _ -> emptyShape)
+
+cube :: Puzzle Shape
+cube = f <$> rubik <*> puzzleSide <*> puzzleSquare
+  where f col sd sq = tile (pack $ showColor $ col) 
+                `overlay`
+                       text 5 (s (mega sd sq))
+        s (V3 a b c) = show a ++ "\n" ++ show b ++ "\n" ++ show c
+
+rubik :: Puzzle Color
+rubik = Puzzle (fmap pure start)
+
+--- blank cube
 cube' :: Puzzle Shape
 cube' = Puzzle
       $ fmap face'
@@ -83,7 +94,7 @@ cube' = Puzzle
 --main = shape (drawCube $ fmap drawFace cube)
 
 main = shape $ packShapes 
-             [ [ drawCube cube' ]
+             [ [ drawCube cube ]
 --             , [ drawCube $ drawFace' <*> rotateCube (Axis Z Plus) cube' ]
              ]
 
@@ -172,7 +183,7 @@ facePlacement'' ax (V2 a b) = case ax of
         f Zero     = 1
         f PlusOne  = 2
 
-
+-}
 data Layer = E Sign      -- -2 or 2
            | I Abs       -- -1 | 0 | 1
            deriving (Eq, Ord, Show)
@@ -186,7 +197,7 @@ instance Negate Layer where
 
 type Mega = V3 Layer
 
-mega :: Puzzle Mega
+mega :: Axis D3 -> V2 Abs -> Mega
 mega (Axis X s) (V2 y z) = V3 (E s) (I y) (I z)
 mega (Axis Y s) (V2 x z) = V3 (I x) (E s) (I z)
 mega (Axis Z s) (V2 x y) = V3 (I x) (I y) (E s)
@@ -195,7 +206,7 @@ megaAxis :: Mega -> (Axis D3,V2 Abs)
 megaAxis (V3 (E s) (I y) (I z)) = (Axis X s,V2 y z)
 megaAxis (V3 (I x) (E s) (I z)) = (Axis Y s,V2 x z)
 megaAxis (V3 (I x) (I y) (E s)) = (Axis Z s,V2 x y)
-
+{-
 -- rotate a Mega around a view point
 rotateLayer :: Axis D3 -> Mega -> Mega
 rotateLayer (Axis X Plus)  (V3 x y z) = V3 x z (N.negate y)
