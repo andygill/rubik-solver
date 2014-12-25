@@ -28,6 +28,7 @@ library
          Rubik.Negate,
          Rubik.Shape,
          Rubik.Sign,
+         Rubik.Test,
          Rubik.Turn,
          Rubik.V2,
          Rubik.V3

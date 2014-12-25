@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables, OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables, OverloadedStrings, FlexibleContexts #-}
 module Rubik.Test where
         
 import Control.Applicative
@@ -20,6 +20,8 @@ import Rubik.Abs
 import Rubik.Negate as N
 import Rubik.Puzzle
 
+import Graphics.Blank (blankCanvas, send, events,wait, eType, eWhich)
+import qualified Data.Char as Char
 
 drawCube :: Puzzle Shape -> Shape
 drawCube = borderShape 0.1
@@ -97,6 +99,42 @@ main = shape $ packShapes
              [ [ drawCube $ cube ]
              , [ drawCube $ rotate (Turn3D t Z) $ cube | t <- universe ]
              ]
+
+
+main2 = blankCanvas 3000 { events = ["keypress"] } $ \ context -> 
+     let loop cube' = do
+            send context $ drawShape context 
+                         $ borderShape 0.1 
+                         $ packShapes [ [ drawCube $ cube, drawCube $ cube' ] ]
+            e <- wait context
+            print e
+            if eType e == "keypress" 
+            then case eWhich e of
+                   Just ch -> loop $ keypress (Char.chr ch) cube' cube
+                   _ -> loop cube'
+            else loop cube'
+     in loop cube                             
+
+-- keypress :: a -> a -> 
+keypress :: Char -> Puzzle a -> Puzzle a -> Puzzle a
+keypress 'x' = const . rotate (Turn3D Clock X) 
+keypress 'y' = const . rotate (Turn3D Clock Y) 
+keypress 'z' = const . rotate (Turn3D Clock Z) 
+keypress 'X' = const . rotate (Turn3D CounterClock X) 
+keypress 'Y' = const . rotate (Turn3D CounterClock Y) 
+keypress 'Z' = const . rotate (Turn3D CounterClock Z) 
+keypress ' ' = flip const  -- restore original
+keypress _   = const       -- do nothing
+        
+{-
+Event {eMetaKey = False, ePageXY = Nothing, eType = "keypress", eWhich = Just 120}
+Event {eMetaKey = False, ePageXY = Nothing, eType = "keypress", eWhich = Just 121}
+Event {eMetaKey = False, ePageXY = Nothing, eType = "keypress", eWhich = Just 122}
+Event {eMetaKey = False, ePageXY = Nothing, eType = "keypress", eWhich = Just 88}
+Event {eMetaKey = False, ePageXY = Nothing, eType = "keypress", eWhich = Just 89}
+Event {eMetaKey = False, ePageXY = Nothing, eType = "keypress", eWhich = Just 90}
+-}            
+
 
 {-
              -- notations
