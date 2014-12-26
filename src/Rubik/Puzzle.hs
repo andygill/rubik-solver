@@ -61,7 +61,7 @@ instance Negate Layer where
     negate (E s) = E (N.negate s)
     negate (I a) = I (N.negate a)
 
-type Mega = V3 Layer
+type Mega = V3 Layer -- TODO: Rename
 
 mega :: Axis D3 -> V2 Abs -> Mega
 mega (Axis X s) (V2 y z) = V3 (E s) (I y) (I z)
