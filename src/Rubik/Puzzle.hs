@@ -29,7 +29,6 @@ instance Show a => Show (Puzzle a) where
 instance Functor Puzzle where
   fmap f (Puzzle p) = Puzzle $ fmap (fmap f) $ p
 
-
 instance Applicative Puzzle where
   pure = Puzzle . pure . pure
   (Puzzle f) <*> (Puzzle a) = Puzzle $ liftA2 (liftA2 ($)) f a
@@ -73,3 +72,6 @@ megaAxis :: Mega -> (Axis D3,V2 Abs)
 megaAxis (V3 (E s) (I y) (I z)) = (Axis X s,V2 y z)
 megaAxis (V3 (I x) (E s) (I z)) = (Axis Y s,V2 x z)
 megaAxis (V3 (I x) (I y) (E s)) = (Axis Z s,V2 x y)
+
+--data Tile a = Ix (Axis D3) (V2 a)
+--data Ix3D a = Ix3D (Layer a) (Layer a) (Layer a)

@@ -1,4 +1,4 @@
-{-# LANGUAGE MultiParamTypeClasses, TypeFamilies #-}
+{-# LANGUAGE MultiParamTypeClasses, TypeFamilies, RankNTypes #-}
 module Rubik.V2 where
         
 import Rubik.Negate as N
@@ -31,3 +31,4 @@ instance (Key a) => Key (V2 a) where
 -- rotate and rotate back is an identity
 prop_rotate_V2 :: Turn -> V2 Abs -> Bool
 prop_rotate_V2 t v2 = rotate (N.negate t) (rotate t v2) == v2
+

@@ -143,13 +143,13 @@ side turn@(Turn3D t d) = fmap (\ (V3 x y z) -> True) coord
 class Crown c where
   crown :: c -> Bool
 
-instance Crown Sign where
-  crown Plus = True
-  crown Minus = False
-
 instance (Negate c, Crown c) => Crown (Axis c) where
   crown (Axis c Plus)  = crown c
   crown (Axis c Minus) = crown (N.negate c)
+
+instance Crown Sign where
+  crown Plus = True
+  crown Minus = False
           
 instance Crown Abs where
   crown PlusOne = True
@@ -159,7 +159,10 @@ instance Crown Layer where
   crown (E sgn) = crown sgn
   crown (I abs) = crown abs  
 
-
+crown3D :: Axis D3 -> (Mega -> Bool)
+crown3D (Axis X sgn) (V3 x _ _) = crown (Axis x sgn)
+crown3D (Axis Y sgn) (V3 _ y _) = crown (Axis y sgn)
+crown3D (Axis Z sgn) (V3 _ _ z) = crown (Axis z sgn)
 
 {-
 crown :: Sign -> Layer -> Bool
