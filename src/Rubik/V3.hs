@@ -1,4 +1,4 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE MultiParamTypeClasses, TypeFamilies #-}
 module Rubik.V3 where
         
 import Rubik.Abs
@@ -18,7 +18,8 @@ data Turn3D = Turn3D Turn D3
 instance Negate Turn3D where
   negate (Turn3D t d) = (Turn3D (N.negate t) d)
 
-instance Negate a => Rotate Turn3D (V3 a) where
+instance Negate a => Rotate (V3 a) where
+  type SideOf (V3 a) = Turn3D
   rotate (Turn3D t X) (V3 x y z) = V3 x  y' z' where (V2 y' z') = rotate t $ V2 y z
   rotate (Turn3D t Y) (V3 x y z) = V3 x' y  z' where (V2 z' x') = rotate t $ V2 z x -- intentually flipped
   rotate (Turn3D t Z) (V3 x y z) = V3 x' y' z  where (V2 x' y') = rotate t $ V2 x y

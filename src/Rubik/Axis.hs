@@ -6,7 +6,7 @@ import Rubik.Negate     as N
 import Rubik.Sign       as S
 import Rubik.Key        as K
 
--- Perhaps call Axis, or Unit.
+-- Perhaps call Axis, or Unit, or Signed.
 data Axis dim = Axis dim Sign
     deriving (Eq,Ord,Ix)
     

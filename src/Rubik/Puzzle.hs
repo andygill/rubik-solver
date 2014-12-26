@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings, MultiParamTypeClasses, TypeFamilies #-}
 module Rubik.Puzzle where
         
 import Control.Applicative
@@ -46,7 +46,8 @@ puzzleSquare :: Puzzle (V2 Abs)         -- Puzzle location
 puzzleSquare = Puzzle (\ _ sq -> sq)
 
 
-instance Rotate Turn3D (Puzzle a) where
+instance Rotate (Puzzle a) where
+  type SideOf (Puzzle a) = Turn3D
   rotate twist (Puzzle p) = Puzzle $ \ sd sq -> case megaAxis (rotate (N.negate twist) (mega sd sq)) of
                                                   (sd',sq') -> p sd' sq'
 
